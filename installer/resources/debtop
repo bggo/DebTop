@@ -106,6 +106,8 @@ sysChroot() {
 doRun() {
 	local RUN="${1}"
 
+	sudo chroot $DEBROOT dhclient &>/dev/null
+
 	if ! [ -z $RUN ]; then
 		sudo chroot $DEBROOT $RUN
 	else
