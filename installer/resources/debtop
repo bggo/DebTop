@@ -5,6 +5,8 @@
 # system and/or programs inside the chroot jail.
 #
 # Its settings MUST be on /opt/DebTop/etc/main.cf
+#
+# Author: Diego Lima <diego@diegolima.org>
 
 PROGRAM="${1}"
 
@@ -12,8 +14,16 @@ test -f /opt/DebTop/etc/main.cf && . /opt/DebTop/etc/main.cf
 test -f /opt/DebTop/etc/extra.cf && . /opt/DebTop/etc/extra.cf
 
 createLoopDevice() {
-        if ! [ -b $LOOPDEVICE ]; then
-                sudo mknod -m600 $LOOPDEVICE b 7 50
+	if ! [ -f /tmp/debtop-loop ]; then
+		LOOPCNT=50
+	else
+		LOOPCNT=`cat /tmp/debtop-loop`
+		LOOPCNT=$(($LOOPCNT+1))
+	fi
+
+	if ! [ -b ${LOOPDEVICE}${LOOPCNT} ]; then
+		echo $LOOPCNT > /tmp/debtop-loop
+		sudo mknod -m600 ${LOOPDEVICE}${LOOPCNT} b 7 $LOOPCNT
         fi
 }
 
@@ -21,74 +31,70 @@ doMount() {
 	if ! [ -z $SDPART ]; then
 		sudo mount | grep $SDPART &>/dev/null
 		if [ $? != 0 ]; then
-			sudo mount $SDPART $MEDIA || echo "Could NOT mount $SDPART" && exit 1
+			sudo mount $SDPART $MEDIA || exit 1
 		else
 			echo "$SDPART already mounted"
 		fi
 	fi
 
 	if ! [ -f $DISK  ]; then
-		echo "I could NOT find your Linux disk. Please check that it exists on $DISK" 
-		exit 1
+		xmessage "I could NOT find your Linux disk. Please check that it exists on $DISK" 
+		exit 2
 	fi
 	
 	sudo mount | grep $DEBROOT &>/dev/null
 	if [ $? != 0 ]; then
-		sudo mount -o loop=$LOOPDEVICE,noatime,data=journal $DISK $DEBROOT
+		createLoopDevice
+		sudo mount -o loop=${LOOPDEVICE}${LOOPCNT},noatime,data=journal $DISK $DEBROOT || exit 3
 	fi
 }
 doUmount() {
-	sleep 5
-	sudo umount -d $DEBROOT
-
-	for i in `sudo mount|grep $DEBROOT`; do
-		sudo umount -l $i
+	for i in `sudo mount|grep $DEBROOT|awk '{print $3}'|tac`; do
+		sudo umount -l $i &> /dev/null
 	done
 }
 
 sysChroot() {
-	local ACTION="$1"
-	if [[ ( $ACTION != "mount" ) && ( $ACTION != "umount" ) ]]; then
-		echo "Internal error! Unsupported Action!"
-		exit 1
-	fi
-	if [ $ACTION = "umount" ]; then
-		ACTION="umount -l"
-	fi
+	ACTION="sudo mount"
+	MTOPTS="-o bind"
 
-	test -f $DEBROOT/bin/sh || exit 1
+	test -f $DEBROOT/bin/sh 
+	if [ $? != 0 ]; then
+		xmessage "Your image does not contain a /bin/sh shell!"
+		exit 5
+	fi
 	
 	test -d $DEBROOT/proc || sudo mkdir -p $DEBROOT/proc
 	sudo mount | grep $DEBROOT/proc &>/dev/null|| \
-		sudo $ACTION -o bind /proc $DEBROOT/proc &>/dev/null
+		sudo $ACTION $MTOPTS /proc $DEBROOT/proc &>/dev/null
 
 	test -d $DEBROOT/dev || sudo mkdir -p $DEBROOT/dev
 	sudo mount | grep $DEBROOT/dev &>/dev/null|| \
-		sudo $ACTION -o bind /dev  $DEBROOT/dev &>/dev/null
+		sudo $ACTION $MTOPTS /dev  $DEBROOT/dev &>/dev/null
 	
 	test -d $DEBROOT/dev/pts || sudo mkdir -p $DEBROOT/dev/pts
 	sudo mount | grep $DEBROOT/dev/pts &>/dev/null|| \
-		sudo $ACTION -o bind /dev/pts $DEBROOT/dev/pts &>/dev/null
+		sudo $ACTION $MTOPTS /dev/pts $DEBROOT/dev/pts &>/dev/null
 
 	test -d $DEBROOT/dev/shm || sudo mkdir -p $DEBROOT/dev/shm
 	sudo mount | grep $DEBROOT/dev/shm &>/dev/null|| \
-		sudo $ACTION -o bind /dev/shm $DEBROOT/dev/shm &>/dev/null
+		sudo $ACTION $MTOPTS /dev/shm $DEBROOT/dev/shm &>/dev/null
 
 	test -d $DEBROOT/sys || sudo mkdir -p $DEBROOT/sys
 	sudo mount | grep $DEBROOT/sys &>/dev/null|| \
-		sudo $ACTION -o bind /sys  $DEBROOT/sys &>/dev/null
+		sudo $ACTION $MTOPTS /sys  $DEBROOT/sys &>/dev/null
 
 	test -d $DEBROOT/tmp || sudo mkdir -p $DEBROOT/tmp
 	sudo mount | grep $DEBROOT/tmp &>/dev/null|| \
-		sudo $ACTION -o bind /tmp  $DEBROOT/tmp &>/dev/null
+		sudo $ACTION $MTOPTS /tmp  $DEBROOT/tmp &>/dev/null
 
 	test -d $DEBROOT/var/tmp || sudo mkdir -p $DEBROOT/var/tmp
 	sudo mount | grep $DEBROOT/var/tmp &>/dev/null|| \
-		sudo $ACTION -o bind /var/tmp $DEBROOT/var/tmp &>/dev/null
+		sudo $ACTION $MTOPTS /var/tmp $DEBROOT/var/tmp &>/dev/null
 
 	test -d $DEBROOT/var/run/dbus || sudo mkdir -p $DEBROOT/var/run/dbus
 	sudo mount | grep $DEBROOT/var/run/dbus &>/dev/null|| \
-		sudo $ACTION -o bind /var/run/dbus $DEBROOT/var/run/dbus &>/dev/null
+		sudo $ACTION $MTOPTS /var/run/dbus $DEBROOT/var/run/dbus &>/dev/null
 
 	test -d $DEBROOT/media/sdcard || sudo mkdir -p $DEBROOT/media/sdcard
 	sudo mount | grep $DEBROOT/media/sdcard &>/dev/null|| \
@@ -100,12 +106,11 @@ sysChroot() {
 
 	test -d $DEBROOT/home/adas || sudo mkdir -p $DEBROOT/home/adas
 	sudo mount | grep $DEBROOT/home/adas &>/dev/null|| \
-		sudo $ACTION -o bind /home/adas $DEBROOT/home/adas
+		sudo $ACTION $MTOPTS /home/adas $DEBROOT/home/adas
 }
 
 doRun() {
 	local RUN="${1}"
-
 	sudo chroot $DEBROOT dhclient &>/dev/null
 
 	if ! [ -z $RUN ]; then
@@ -115,14 +120,14 @@ doRun() {
 	fi
 }
 
-xhost +
-createLoopDevice
-doMount
-sysChroot mount
+xhost + &>/dev/null
 
-if [ "$PROGRAM" = "DEBTOPSTOP" ]; then
-	sysChroot umount
+if [ "$PROGRAM" == "stop" ]; then
+	echo "Stopping DebTop"
 	doUmount
 else
+	echo "Starting DebTop"
+	doMount
+	sysChroot mount
 	doRun "$PROGRAM"
 fi
