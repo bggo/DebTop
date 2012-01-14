@@ -28,9 +28,11 @@ createLoopDevice() {
 }
 
 doMount() {
+	# Check if we're using an alternate partition on the SD card
 	if ! [ -z $SDPART ]; then
 		sudo mount | grep $SDPART &>/dev/null
 		if [ $? != 0 ]; then
+			echo "Mounting $SDPART on $MEDIA"
 			sudo mount $SDPART $MEDIA || exit 1
 		else
 			echo "$SDPART already mounted"
@@ -45,7 +47,15 @@ doMount() {
 	sudo mount | grep $DEBROOT &>/dev/null
 	if [ $? != 0 ]; then
 		createLoopDevice
-		sudo mount -o loop=${LOOPDEVICE}${LOOPCNT},noatime,data=journal $DISK $DEBROOT || exit 3
+		echo "Mounting $DISK on $DEBROOT using ${LOOPDEVICE}${LOOPCNT}"
+		sudo mount -o loop=${LOOPDEVICE}${LOOPCNT},noatime,data=journal $DISK $DEBROOT
+		if [ $? != 0 ]; then
+			doUmount
+			xmessage "Could NOT mount $DISK. Please check that your SD card is working."
+			exit 3
+		fi
+	else
+		echo "$DEBROOT is already mounted"
 	fi
 }
 doUmount() {
