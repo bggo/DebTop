@@ -168,7 +168,7 @@ probeApp(){
 	local APP="$1"
 	APPPATH=""
 
-	APPPATH=`find $DEBROOT/bin -iname "$APP"`
+	APPPATH=`find $DEBROOT/bin -iname "$APP"`      || \
 	APPPATH=`find $DEBROOT/usr/bin -iname "$APP"`  || \
 	APPPATH=`find $DEBROOT/sbin -iname "$APP"`     || \
 	APPPATH=`find $DEBROOT/usr/sbin -iname "$APP"` || \
