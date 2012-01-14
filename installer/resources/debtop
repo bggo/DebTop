@@ -47,6 +47,7 @@ doMount() {
 	sudo mount | grep $DEBROOT &>/dev/null
 	if [ $? != 0 ]; then
 		createLoopDevice
+		sudo fsck -p $DISK
 		echo "Mounting $DISK on $DEBROOT using ${LOOPDEVICE}${LOOPCNT}"
 		sudo mount -o loop=${LOOPDEVICE}${LOOPCNT},noatime,data=journal $DISK $DEBROOT
 		if [ $? != 0 ]; then
