@@ -143,11 +143,89 @@ doRun() {
 	fi
 }
 
+# Tries to automagically install a shortcut on the AWN bar to the user-specified application.
+# This will work if the user types in the command used to call the program in the linux image.
+installLauncher() {
+	NEWLAUNCHER="`zenity --title="Add a new Launcher" --entry --text='Please enter the name of the program you want to create the launcher to.'`"
+	probeApp "$NEWLAUNCHER"
+	if ! [ -z "$APPPATH" ]; then
+		APPPATH="/`echo $APPPATH|cut -f 5- -d/`"
+		APPDESC="`zenity --title="Add a new Launcher" --entry --text='Please enter a description for the new program'`"
+		createLauncher "$NEWLAUNCHER" "$APPPATH" "$APPDESC" "$APPICON" || zenity --title="Add a new Launcher" --warning --text "We could not create a launcher to the specified program. Please make sure you don't already have a launcher for the program"
+	else
+		zenity --title="Add a new Launcher" --warning --text "We could not find the specified program in your image. Please make sure you typed its name correctly."	
+	fi
+}
+probeApp(){
+	local APP="$1"
+	APPPATH=""
+
+	APPPATH=`find $DEBROOT/bin -iname "$APP"`
+	APPPATH=`find $DEBROOT/usr/bin -iname "$APP"`  || \
+	APPPATH=`find $DEBROOT/sbin -iname "$APP"`     || \
+	APPPATH=`find $DEBROOT/usr/sbin -iname "$APP"` || \
+	APPPATH=`find $DEBROOT/usr/games -iname "$APP"`
+
+	if ! [ -z "$APPPATH" ]; then
+		echo "Looking for an icon..."
+		# Try to find a suitable icon for the application if it was found
+		APPICON=`find $DEBROOT/usr/share/icons -iname *${APP}*.png|grep 48x48|tail -1` || \
+		APPICON=`find $DEBROOT/usr/share/icons -iname *${APP}*.png|grep 16x16|tail -1` || \
+		APPICON=`find $DEBROOT/usr/share/icons -iname *${APP}*.png|tail -1` || \
+		APPICON=""
+		echo "$APPICON"
+	fi
+}
+createLauncher() {
+	local APPNAME="$1"
+	local APPDEST="$2"
+	local APPDESC="$3"
+	local APPICON="$4"
+
+	if [ -z $APPICON ]; then
+		APPICON="debian.png"
+	else
+		cp $APPICON /opt/DebTop/icons
+		APPICON=`basename $APPICON`
+	fi
+
+	local MYAPP="/usr/share/applications/debtop-"${APPNAME}".desktop"
+
+	if ! [ -e "$MYAPP" ]; then
+		sudo touch "$MYAPP"
+		sudo chmod 666 "$MYAPP"
+		echo "[Desktop Entry]
+Encoding=UTF-8
+Name=$APPNAME
+GenericName=$APPNAME
+Comment=$APPDESC
+TryExec=/usr/sbin/debtop $APPDEST
+Exec=/usr/sbin/debtop $APPDEST
+Icon=/opt/DebTop/icons/${APPICON}
+Type=Application" > "$MYAPP"
+		sudo chmod 644 "$MYAPP"
+		
+		echo "Adding $MYAPP to launcher list..."
+		local LAUNCHERS=`gconftool -g /apps/avant-window-navigator/window_manager/launchers|cut -f2 -d[|cut -f1 -d]`
+		local LAUNCHERS="$LAUNCHERS,$MYAPP"
+		echo "$LAUNCHERS"
+
+		gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string
+		return 0
+	else
+		return 1
+	fi
+}
+
 xhost + &>/dev/null
 
 if [ "$PROGRAM" == "stop" ]; then
 	echo "Stopping DebTop"
 	doUmount
+elif [ "$PROGRAM" == "add-launcher" ]; then
+	doMount
+	sysChroot mount
+	installLauncher
 else
 	echo "Starting DebTop"
 	doMount
