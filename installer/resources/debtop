@@ -136,10 +136,10 @@ doRun() {
 	local RUN="${1}"
 	sudo chroot $DEBROOT dhclient &>/dev/null
 
-	if ! [ -z $RUN ]; then
+	if ! [ -z "$RUN" ]; then
 		sudo chroot $DEBROOT $RUN
 	else
-		sudo chroot $DEBROOT /usr/bin/lxterminal -e pdemenu
+		sudo chroot $DEBROOT /usr/bin/lxterminal -e pdmenu
 	fi
 }
 
