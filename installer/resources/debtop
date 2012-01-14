@@ -83,7 +83,7 @@ sysChroot() {
 
 	test -f $DEBROOT/bin/sh 
 	if [ $? != 0 ]; then
-		xmessage "Your image does not contain a /bin/sh shell!"
+		xmessage "Your image does not contain a valid shell!"
 		exit 5
 	fi
 	
