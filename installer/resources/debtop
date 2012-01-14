@@ -47,7 +47,18 @@ doMount() {
 	sudo mount | grep $DEBROOT &>/dev/null
 	if [ $? != 0 ]; then
 		createLoopDevice
-		sudo fsck -p $DISK
+
+		# Check the filesystem for errors
+		sudo fsck -p $DISK &>/dev/null
+		if [ $? = 0 ]; then
+			echo "Filesystem check completed. No errors found"
+		elif [ $? = 1 ]; then
+			echo "Filesystem contained errors but they've been fixed"
+		else
+			xmessage -buttons "Cancel:1,Mount Anyway:0" "Your image filesystem contain errors that cannot be corrected automatically. 
+Please refer to DebTop wiki on how to manually fix the errors." || exit 6
+		fi
+
 		echo "Mounting $DISK on $DEBROOT using ${LOOPDEVICE}${LOOPCNT}"
 		sudo mount -o loop=${LOOPDEVICE}${LOOPCNT},noatime,data=journal $DISK $DEBROOT
 		if [ $? != 0 ]; then
