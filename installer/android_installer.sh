@@ -65,6 +65,7 @@ fi
 
 ############################# Populate Settings ###############################
 > /opt/DebTop/etc/main.cf
+sudo chmod 666 /opt/DebTop/etc/main.cf
 
 if ! [ -b /dev/mmcblk1p2 ]; then
 	echo "Partitioned SD Card NOT found."
@@ -74,13 +75,13 @@ if ! [ -b /dev/mmcblk1p2 ]; then
 			sudo rm /opt/DebTop/linuxdisk
 		fi
 		sudo ln -s /sdcard/DebTop/linuxdisk /opt/DebTop/linuxdisk
-		sudo echo "DISK=/sdcard/DebTop/linuxdisk" >> /opt/DebTop/etc/main.cf
+		echo "DISK=/sdcard/DebTop/linuxdisk" >> /opt/DebTop/etc/main.cf
 	elif [ -f /sdcard-ext/DebTop/linuxdisk ]; then
 		if [ -L /opt/DebTop/linuxdisk ]; then
 			sudo rm /opt/DebTop/linuxdisk
 		fi
 		sudo ln -s /sdcard-ext/DebTop/linuxdisk /opt/DebTop/linuxdisk
-		sudo echo "DISK=/sdcard-ext/DebTop/linuxdisk" >> /opt/DebTop/etc/main.cf
+		echo "DISK=/sdcard-ext/DebTop/linuxdisk" >> /opt/DebTop/etc/main.cf
 	else
 		echo "No image found!"
 		exit 1
@@ -94,20 +95,22 @@ else
 		sudo rm /opt/DebTop/linuxdisk
 	fi
 	sudo ln -s /opt/DebTop/media/DebTop/linuxdisk /opt/DebTop/linuxdisk
-	sudo echo "SDPART=/dev/mmcblk1p2" >> /opt/DebTop/etc/main.cf
-	sudo echo "DISK=/opt/DebTop/media/DebTop/linuxdisk" >> /opt/DebTop/etc/main.cf
+	echo "SDPART=/dev/mmcblk1p2" >> /opt/DebTop/etc/main.cf
+	echo "DISK=/opt/DebTop/media/DebTop/linuxdisk" >> /opt/DebTop/etc/main.cf
 fi
 
-sudo echo "MEDIA=/opt/DebTop/media" >>  /opt/DebTop/etc/main.cf
-sudo echo "DEBROOT=/opt/DebTop/root" >> /opt/DebTop/etc/main.cf
-sudo echo "LOOPDEVICE=/dev/block/loop50" >> /opt/DebTop/etc/main.cf
+echo "MEDIA=/opt/DebTop/media" >>  /opt/DebTop/etc/main.cf
+echo "DEBROOT=/opt/DebTop/root" >> /opt/DebTop/etc/main.cf
+echo "LOOPDEVICE=/dev/block/loop50" >> /opt/DebTop/etc/main.cf
 
+sudo chown root.root /opt/DebTop/etc/main.cf
+sudo chmod 644 /opt/DebTop/etc/main.cf
 
 echo "Creating DebTop launcher"
 sudo cp resources/debtop /usr/sbin
 sudo touch /usr/share/applications/debtop.desktop
 sudo chmod 666 /usr/share/applications/debtop.desktop
-sudo echo "[Desktop Entry]
+echo "[Desktop Entry]
 Encoding=UTF-8
 Name=DebTop
 GenericName=DebTop
@@ -119,6 +122,22 @@ Type=Application" > /usr/share/applications/debtop.desktop
 EXTRA="/usr/share/applications/debtop.desktop"
 sudo chmod 644 /usr/share/applications/debtop.desktop
 
+echo "Creating DebTop LM launcher"
+sudo touch /usr/share/applications/debtop-lm.desktop
+sudo chmod 666 /usr/share/applications/debtop-lm.desktop
+echo "[Desktop Entry]
+Encoding=UTF-8
+Name=DebTopLM
+GenericName=DebTopLM
+Comment=DebTop Launcher Manager
+TryExec=/usr/sbin/debtop launcher-manager
+Exec=/usr/sbin/debtop launcher-manager
+Icon=/opt/DebTop/icons/debian.png
+Type=Application" > /usr/share/applications/debtop-lm.desktop
+EXTRA="$EXTRA,/usr/share/applications/debtop-lm.desktop"
+sudo chmod 644 /usr/share/applications/debtop-lm.desktop
+
+
 ############################### Extras ########################################
 echo "Probing for additional software in your disk"
 sudo mount -o loop=/dev/block/loop50 /opt/DebTop/linuxdisk /mnt || exit 1
@@ -129,7 +148,7 @@ if [ -x /mnt/usr/bin/lxterminal ]; then
 	sudo cp /mnt/usr/share/pixmaps/lxterminal.png /opt/DebTop/icons/lxterminal.png
 	sudo touch /usr/share/applications/debtop-lxterminal.desktop
 	sudo chmod 666 /usr/share/applications/debtop-lxterminal.desktop
-	sudo echo "[Desktop Entry]
+	echo "[Desktop Entry]
 Encoding=UTF-8
 Name=lxterminal
 GenericName=lxterminal
@@ -148,7 +167,7 @@ if [ -x /mnt/usr/bin/iceweasel ]; then
 	sudo cp /mnt/usr/share/icons/hicolor/48x48/apps/iceweasel.png /opt/DebTop/icons/iceweasel.png
 	sudo touch /usr/share/applications/debtop-iceweasel.desktop
 	sudo chmod 666 /usr/share/applications/debtop-iceweasel.desktop
-	sudo echo "[Desktop Entry]
+	echo "[Desktop Entry]
 Encoding=UTF-8
 Name=Iceweasel
 GenericName=Iceweasel
@@ -168,7 +187,7 @@ if [ -x /mnt/usr/bin/libreoffice ]; then
 	sudo cp /mnt/usr/share/icons/hicolor/128x128/apps/libreoffice34-startcenter.png /opt/DebTop/icons/libreoffice.png
 	sudo touch /usr/share/applications/debtop-libreoffice.desktop
 	sudo chmod 666 /usr/share/applications/debtop-libreoffice.desktop
-	sudo echo "[Desktop Entry]
+	echo "[Desktop Entry]
 Encoding=UTF-8
 Name=Libreoffice
 GenericName=Libreoffice
@@ -188,7 +207,7 @@ if [ -x /mnt/usr/bin/transmission-gtk ]; then
 	sudo cp /mnt/usr/share/icons/hicolor/48x48/apps/transmission.png /opt/DebTop/icons/transmission.png
 	sudo touch /usr/share/applications/debtop-transmission.desktop
 	sudo chmod 666 /usr/share/applications/debtop-transmission.desktop
-	sudo echo "[Desktop Entry]
+	echo "[Desktop Entry]
 Encoding=UTF-8
 Name=Transmission
 GenericName=Transmission
@@ -207,7 +226,7 @@ if [ -x /mnt/usr/bin/xfce4-screenshooter ]; then
 	sudo cp /mnt/usr/share/icons/hicolor/48x48/apps/applets-screenshooter.png /opt/DebTop/icons/screenshot.png
 	sudo touch /usr/share/applications/debtop-screenshot.desktop
 	sudo chmod 666 /usr/share/applications/debtop-screenshot.desktop
-	sudo echo "[Desktop Entry]
+	echo "[Desktop Entry]
 Encoding=UTF-8
 Name=Screenshot
 GenericName=Screenshot
@@ -226,7 +245,7 @@ if [ -x /mnt/usr/sbin/synaptic ]; then
 	sudo cp icon 
 	sudo touch /usr/share/applications/debtop-synaptic.desktop
 	sudo chmod 666 /usr/share/applications/debtop-synaptic.desktop
-	sudo echo "[Desktop Entry]
+	echo "[Desktop Entry]
 Encoding=UTF-8
 Name=Screenshot
 GenericName=Synaptic

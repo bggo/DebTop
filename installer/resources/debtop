@@ -143,10 +143,18 @@ doRun() {
 	fi
 }
 
+startLauncherManager() {
+	#TODO: For now this just calls installLauncher(), but it should implement 3 things:
+	# - Add new launcher (done)
+	# - Remove launcher
+	# - Edit launcher
+	installLauncher
+}
+
 # Tries to automagically install a shortcut on the AWN bar to the user-specified application.
 # This will work if the user types in the command used to call the program in the linux image.
 installLauncher() {
-	NEWLAUNCHER="`zenity --title="Add a new Launcher" --entry --text='Please enter the name of the program you want to create the launcher to.'`"
+	NEWLAUNCHER="`zenity --title="Add a new Launcher" --entry --text='Please enter the name of the program you want to create the launcher to.'`" || exit 0
 	probeApp "$NEWLAUNCHER"
 	if ! [ -z "$APPPATH" ]; then
 		APPPATH="/`echo $APPPATH|cut -f 5- -d/`"
@@ -222,10 +230,10 @@ xhost + &>/dev/null
 if [ "$PROGRAM" == "stop" ]; then
 	echo "Stopping DebTop"
 	doUmount
-elif [ "$PROGRAM" == "add-launcher" ]; then
+elif [ "$PROGRAM" == "launcher-manager" ]; then
 	doMount
 	sysChroot mount
-	installLauncher
+	startLauncherManager
 else
 	echo "Starting DebTop"
 	doMount
