@@ -20,9 +20,10 @@ createLoopDevice() {
 		LOOPCNT=`cat /tmp/debtop-loop`
 		LOOPCNT=$(($LOOPCNT+1))
 	fi
+	sudo rm /tmp/debtop-loop
+	echo $LOOPCNT > /tmp/debtop-loop
 
 	if ! [ -b ${LOOPDEVICE}${LOOPCNT} ]; then
-		echo $LOOPCNT > /tmp/debtop-loop
 		sudo mknod -m600 ${LOOPDEVICE}${LOOPCNT} b 7 $LOOPCNT
         fi
 }
