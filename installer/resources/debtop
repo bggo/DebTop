@@ -269,8 +269,7 @@ installLauncher() {
 	# Trim the path for use inside the chrooted system
 	APPPATH="/`echo $APPPATH|cut -f 5- -d/`"
 
-	XENTRY "Please enter a description for the new program"
-	createLauncher "$NEWLAUNCHER" "$APPPATH" "$XRETURN" "$APPICON"
+	createLauncher "$NEWLAUNCHER" "$APPPATH" "$APPICON"
 	if [ $? != 0 ]; then
 		XWARN "We could not create a launcher to the specified program. Please make sure you don't already have a launcher for the program"
 		exit 9
@@ -301,8 +300,7 @@ probeApp(){
 createLauncher() {
 	local APPNAME="$1"
 	local APPDEST="$2"
-	local APPDESC="$3"
-	local APPICON="$4"
+	local APPICON="$3"
 
 	# Never trust others
 	test -z "$APPNAME" && return 1
@@ -326,7 +324,6 @@ createLauncher() {
 Encoding=UTF-8
 Name=$APPNAME
 GenericName=$APPNAME
-Comment=$APPDESC
 TryExec=/usr/sbin/debtop $APPDEST
 Exec=/usr/sbin/debtop $APPDEST
 Icon=/opt/DebTop/icons/${APPICON}
