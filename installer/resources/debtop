@@ -231,6 +231,11 @@ doRun() {
 	local RUN="${1}"
 	sudo chroot $DEBROOT dhclient &>/dev/null
 
+	# Enable dead keys support
+	if [ "x$DEADKEYS" = "xy" ]; then
+		setxkbmap  -layout us -variant intl
+	fi
+
 	if ! [ -z "$RUN" ]; then
 		sudo chroot $DEBROOT $RUN
 	else

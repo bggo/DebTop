@@ -49,11 +49,8 @@ echo ""
 echo "Do you want me to disable Tomoyo? If unsure just say yes."
 echo "[Y]/n"
 read DIS_TOMOYO
-
-if [ -z $DIS_TOMOYO ]; then
-	DIS_TOMOYO="y"
-fi
-DIS_TOMOYO=`echo $DIS_TOMOYO|tr [:upper:] [:lower:]` 
+if [ -z $DIS_TOMOYO ]; then DIS_TOMOYO="y"; fi
+DIS_TOMOYO=`echo $DIS_TOMOYO|cut -c1|tr [:upper:] [:lower:]` 
 
 if [ "$DIS_TOMOYO" = "y" ]; then
 	echo "Disabling Tomoyo..."
@@ -66,6 +63,19 @@ fi
 ############################# Populate Settings ###############################
 > /opt/DebTop/etc/main.cf
 sudo chmod 666 /opt/DebTop/etc/main.cf
+
+echo ""
+echo "Do you want to enable accented characters (dead keys support)?"
+echo "This is often desirable if you plan to write in any language other than english."
+echo "y/[N]"
+read DEADKEYS
+if [ -z $DEADKEYS ]; then DEADKEYS="n"; fi
+DEADKEYS=`echo $DEADKEYS|cut -c1|tc [:upper:] [:lower:]`
+
+if [ $DEADKEYS = "y" ]; then
+	echo "Enabling dead keys support"
+	echo "DEADKEYS=y" >> /opt/DebTop/etc/main.cf
+fi
 
 if ! [ -b /dev/mmcblk1p2 ]; then
 	echo "Partitioned SD Card NOT found."
