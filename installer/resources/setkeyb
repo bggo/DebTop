@@ -1,0 +1,4 @@
+#!/bin/bash
+# Small script to enable dead keys on the lapdock keyboard. This should also
+# work for any standard US-layout USB keyboard connected to the dock.
+setxkbmap  -layout us -variant intl
