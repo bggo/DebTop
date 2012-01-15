@@ -18,7 +18,7 @@ test -f /opt/DebTop/etc/extra.cf && . /opt/DebTop/etc/extra.cf
 # Use zenity for messages and warnings if available; otherwise fall back to xmessage
 chooseMessenger(){
 	if [ -x /usr/bin/zenity ]; then
-		XGEN="/usr/bin/zenity --title=\"DebTop\""
+		XGEN="/usr/bin/zenity --title=DebTop"
 
 	else
 		XGEN="/usr/bin/xmessage -center"
@@ -144,8 +144,33 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 			XWARN "Could NOT mount $DISK. Please check that your SD card is working."
 			exit 3
 		fi
+
+		# Make sure the mounted disk is valid or try to remount
+		test -f $DEBROOT/bin/sh
+		if [[ ( $? != 0 ) && ( $REMOUNTING != 1 ) ]]; then
+			echo "Image did not contain a valid shell. Trying to remount."
+			REMOUNTING=1
+			doUmount
+			doMount
+		elif [[ ( $? != 0 ) && ( $REMOUNTING = 1 ) ]]; then
+			doUmount
+			XWARN "Your image does not contain a valid shell!"
+			exit 5
+		fi
+
 	else
-		true
+		# Make sure the mounted disk is valid or try to remount
+		test -f $DEBROOT/bin/sh
+		if [[ ( $? != 0 ) && ( $REMOUNTING != 1 ) ]]; then
+			echo "Image did not contain a valid shell. Trying to remount."
+			REMOUNTING=1
+			doUmount
+			doMount
+		elif [[ ( $? != 0 ) && ( $REMOUNTING = 1 ) ]]; then
+			doUmount
+			XWARN "Your image does not contain a valid shell!"
+			exit 5
+		fi
 	fi
 }
 doUmount() {
@@ -157,12 +182,6 @@ doUmount() {
 sysChroot() {
 	ACTION="sudo mount -o bind"
 
-	test -f $DEBROOT/bin/sh 
-	if [ $? != 0 ]; then
-		XWARN "Your image does not contain a valid shell!"
-		exit 5
-	fi
-	
 	test -d $DEBROOT/proc || sudo mkdir -p $DEBROOT/proc
 	sudo mount | grep $DEBROOT/proc &>/dev/null|| \
 		sudo $ACTION /proc $DEBROOT/proc &>/dev/null
