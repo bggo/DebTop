@@ -116,15 +116,25 @@ doMount() {
 		createLoopDevice
 
 		# Check the filesystem for errors
-		sudo fsck -p $DISK &>/dev/null
+		sudo fsck -v -p $DISK
 		local ERROR=$?
 		if [ $ERROR = 0 ]; then
 			echo "Filesystem check completed. No errors found"
 		elif [ $ERROR = 1 ]; then
 			echo "Filesystem contained errors but they've been fixed"
 		else
-			XQUESTION "Mount Anyway" "Cancel" "Your image filesystem contain errors that cannot be corrected automatically. 
-Please refer to DebTop wiki on how to manually fix the errors." || exit 6
+			XQUESTION "Try to fix and mount anyway" "Cancel" "Your image filesystem contain errors that cannot be safely corrected automatically. 
+
+We can try to fix them and mount anyway, or you can check the wiki and try to manually fix the disk yourself."  
+			if [ $? == 0 ]; then 
+				sudo fsck -v -y $DISK 
+				if [ $? -gt 2 ]; then	
+					XWARN "We could NOT fix your disk automatically. Please refer to the wiki on how to manually fix your disk."
+					exit 7
+				fi
+			else
+				exit 6
+			fi
 		fi
 
 		echo "Mounting $DISK on $DEBROOT using ${LOOPDEVICE}${LOOPCNT}"
@@ -145,8 +155,7 @@ doUmount() {
 }
 
 sysChroot() {
-	ACTION="sudo mount"
-	MTOPTS="-o bind"
+	ACTION="sudo mount -o bind"
 
 	test -f $DEBROOT/bin/sh 
 	if [ $? != 0 ]; then
@@ -156,47 +165,47 @@ sysChroot() {
 	
 	test -d $DEBROOT/proc || sudo mkdir -p $DEBROOT/proc
 	sudo mount | grep $DEBROOT/proc &>/dev/null|| \
-		sudo $ACTION $MTOPTS /proc $DEBROOT/proc &>/dev/null
+		sudo $ACTION /proc $DEBROOT/proc &>/dev/null
 
 	test -d $DEBROOT/dev || sudo mkdir -p $DEBROOT/dev
 	sudo mount | grep $DEBROOT/dev &>/dev/null|| \
-		sudo $ACTION $MTOPTS /dev  $DEBROOT/dev &>/dev/null
+		sudo $ACTION /dev  $DEBROOT/dev &>/dev/null
 	
 	test -d $DEBROOT/dev/pts || sudo mkdir -p $DEBROOT/dev/pts
 	sudo mount | grep $DEBROOT/dev/pts &>/dev/null|| \
-		sudo $ACTION $MTOPTS /dev/pts $DEBROOT/dev/pts &>/dev/null
+		sudo $ACTION /dev/pts $DEBROOT/dev/pts &>/dev/null
 
 	test -d $DEBROOT/dev/shm || sudo mkdir -p $DEBROOT/dev/shm
 	sudo mount | grep $DEBROOT/dev/shm &>/dev/null|| \
-		sudo $ACTION $MTOPTS /dev/shm $DEBROOT/dev/shm &>/dev/null
+		sudo $ACTION /dev/shm $DEBROOT/dev/shm &>/dev/null
 
 	test -d $DEBROOT/sys || sudo mkdir -p $DEBROOT/sys
 	sudo mount | grep $DEBROOT/sys &>/dev/null|| \
-		sudo $ACTION $MTOPTS /sys  $DEBROOT/sys &>/dev/null
+		sudo $ACTION /sys  $DEBROOT/sys &>/dev/null
 
 	test -d $DEBROOT/tmp || sudo mkdir -p $DEBROOT/tmp
 	sudo mount | grep $DEBROOT/tmp &>/dev/null|| \
-		sudo $ACTION $MTOPTS /tmp  $DEBROOT/tmp &>/dev/null
+		sudo $ACTION /tmp  $DEBROOT/tmp &>/dev/null
 
 	test -d $DEBROOT/var/tmp || sudo mkdir -p $DEBROOT/var/tmp
 	sudo mount | grep $DEBROOT/var/tmp &>/dev/null|| \
-		sudo $ACTION $MTOPTS /var/tmp $DEBROOT/var/tmp &>/dev/null
+		sudo $ACTION /var/tmp $DEBROOT/var/tmp &>/dev/null
 
 	test -d $DEBROOT/var/run/dbus || sudo mkdir -p $DEBROOT/var/run/dbus
 	sudo mount | grep $DEBROOT/var/run/dbus &>/dev/null|| \
-		sudo $ACTION $MTOPTS /var/run/dbus $DEBROOT/var/run/dbus &>/dev/null
+		sudo $ACTION /var/run/dbus $DEBROOT/var/run/dbus &>/dev/null
 
 	test -d $DEBROOT/media/sdcard || sudo mkdir -p $DEBROOT/media/sdcard
 	sudo mount | grep $DEBROOT/media/sdcard &>/dev/null|| \
-		sudo $ACTION /dev/block/vold/179:18 $DEBROOT/media/sdcard &>/dev/null
+		sudo $ACTION /sdcard $DEBROOT/media/sdcard &>/dev/null
 
 	test -d $DEBROOT/media/sdcard-ext || sudo mkdir -p $DEBROOT/media/sdcard-ext
 	sudo mount | grep $DEBROOT/media/sdcard-ext &>/dev/null|| \
-		sudo $ACTION /dev/block/vold/179:33 $DEBROOT/media/sdcard-ext &>/dev/null
+		sudo $ACTION /sdcard-ext $DEBROOT/media/sdcard-ext &>/dev/null
 
 	test -d $DEBROOT/home/adas || sudo mkdir -p $DEBROOT/home/adas
 	sudo mount | grep $DEBROOT/home/adas &>/dev/null|| \
-		sudo $ACTION $MTOPTS /home/adas $DEBROOT/home/adas
+		sudo $ACTION /home/adas $DEBROOT/home/adas
 }
 
 doRun() {
