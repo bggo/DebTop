@@ -258,25 +258,33 @@ startLauncherManager() {
 # This will work if the user types in the command used to call the program in the linux image.
 installLauncher() {
 	XENTRY "Please enter the name of the program you want to create the launcher to" || exit 0
-	probeApp "$XRETURN" || \
+	NEWLAUNCHER="$XRETURN"
+
+	probeApp "$NEWLAUNCHER" 
+	if [ $? != 0 ]; then
 		XWARN "We could not find the specified program in your image. Please make sure you typed its name correctly."
+		exit 8
+	fi
 
 	# Trim the path for use inside the chrooted system
 	APPPATH="/`echo $APPPATH|cut -f 5- -d/`"
 
 	XENTRY "Please enter a description for the new program"
-	createLauncher "$NEWLAUNCHER" "$APPPATH" "$XRETURN" "$APPICON" || \
+	createLauncher "$NEWLAUNCHER" "$APPPATH" "$XRETURN" "$APPICON"
+	if [ $? != 0 ]; then
 		XWARN "We could not create a launcher to the specified program. Please make sure you don't already have a launcher for the program"
+		exit 9
+	fi
 }
 probeApp(){
 	local APP="$1"
 	APPPATH=""
 
-	APPPATH=`find $DEBROOT/bin -iname "$APP"`      || \
-	APPPATH=`find $DEBROOT/usr/bin -iname "$APP"`  || \
-	APPPATH=`find $DEBROOT/sbin -iname "$APP"`     || \
-	APPPATH=`find $DEBROOT/usr/sbin -iname "$APP"` || \
-	APPPATH=`find $DEBROOT/usr/games -iname "$APP"`
+	test -z $APPPATH && APPPATH=`find $DEBROOT/bin -iname "$APP"`
+	test -z $APPPATH && APPPATH=`find $DEBROOT/usr/bin -iname "$APP"`
+	test -z $APPPATH && APPPATH=`find $DEBROOT/sbin -iname "$APP"`
+	test -z $APPPATH && APPPATH=`find $DEBROOT/usr/sbin -iname "$APP"`
+	test -z $APPPATH && APPPATH=`find $DEBROOT/usr/games -iname "$APP"`
 
 	if ! [ -z "$APPPATH" ]; then
 		echo "Looking for an icon..."
@@ -296,6 +304,10 @@ createLauncher() {
 	local APPDESC="$3"
 	local APPICON="$4"
 
+	# Never trust others
+	test -z "$APPNAME" && return 1
+	test -z "$APPDEST" && return 1
+
 	if [ -z $APPICON ]; then
 		APPICON="debian.png"
 	else
@@ -305,6 +317,8 @@ createLauncher() {
 
 	local MYAPP="`echo /usr/share/applications/debtop-"${APPNAME}".desktop|tr [:upper:] [:lower:]`"
 
+	# Create a new entry if we don't already have one;
+	# Otherwise just go aheand and add the launcher to the AWN bar.
 	if ! [ -e "$MYAPP" ]; then
 		sudo touch "$MYAPP"
 		sudo chmod 666 "$MYAPP"
@@ -318,17 +332,14 @@ Exec=/usr/sbin/debtop $APPDEST
 Icon=/opt/DebTop/icons/${APPICON}
 Type=Application" > "$MYAPP"
 		sudo chmod 644 "$MYAPP"
-		
-		echo "Adding $MYAPP to launcher list..."
-		local LAUNCHERS=`gconftool -g /apps/avant-window-navigator/window_manager/launchers|cut -f2 -d[|cut -f1 -d]`
-		local LAUNCHERS="$LAUNCHERS,$MYAPP"
-		echo "$LAUNCHERS"
-
-		gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string
-		return 0
-	else
-		return 1
 	fi
+
+	echo "Adding $MYAPP to launcher list..."
+	local LAUNCHERS=`gconftool -g /apps/avant-window-navigator/window_manager/launchers|cut -f2 -d[|cut -f1 -d]`
+	local LAUNCHERS="$LAUNCHERS,$MYAPP"
+	echo "$LAUNCHERS"
+
+	gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string || return 1
 }
 
 xhost + &>/dev/null
