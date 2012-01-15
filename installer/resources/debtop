@@ -16,7 +16,7 @@ test -f /opt/DebTop/etc/extra.cf && . /opt/DebTop/etc/extra.cf
 
 # Check the available X interfaces for showing messages.
 # Use zenity for messages and warnings if available; otherwise fall back to xmessage
-chooseMessager(){
+chooseMessenger(){
 	if [ -x /usr/bin/zenity ]; then
 		XGEN="/usr/bin/zenity --title=\"DebTop\""
 
@@ -102,7 +102,7 @@ doMount() {
 			echo "Mounting $SDPART on $MEDIA"
 			sudo mount $SDPART $MEDIA || exit 1
 		else
-			echo "$SDPART already mounted"
+			true
 		fi
 	fi
 
@@ -135,7 +135,7 @@ Please refer to DebTop wiki on how to manually fix the errors." || exit 6
 			exit 3
 		fi
 	else
-		echo "$DEBROOT is already mounted"
+		true
 	fi
 }
 doUmount() {
@@ -221,14 +221,14 @@ startLauncherManager() {
 # Tries to automagically install a shortcut on the AWN bar to the user-specified application.
 # This will work if the user types in the command used to call the program in the linux image.
 installLauncher() {
-	XQUERY "Please enter the name of the program you want to create the launcher to" || exit 0
+	XENTRY "Please enter the name of the program you want to create the launcher to" || exit 0
 	probeApp "$XRETURN" || \
 		XWARN "We could not find the specified program in your image. Please make sure you typed its name correctly."
 
 	# Trim the path for use inside the chrooted system
 	APPPATH="/`echo $APPPATH|cut -f 5- -d/`"
 
-	XQUERY "Please enter a description for the new program"
+	XENTRY "Please enter a description for the new program"
 	createLauncher "$NEWLAUNCHER" "$APPPATH" "$XRETURN" "$APPICON" || \
 		XWARN "We could not create a launcher to the specified program. Please make sure you don't already have a launcher for the program"
 }
@@ -296,6 +296,7 @@ Type=Application" > "$MYAPP"
 }
 
 xhost + &>/dev/null
+chooseMessenger
 
 if [ "$PROGRAM" == "stop" ]; then
 	echo "Stopping DebTop"
