@@ -13,6 +13,72 @@ PROGRAM="${1}"
 test -f /opt/DebTop/etc/main.cf && . /opt/DebTop/etc/main.cf
 test -f /opt/DebTop/etc/extra.cf && . /opt/DebTop/etc/extra.cf
 
+
+# Check the available X interfaces for showing messages.
+# Use zenity for messages and warnings if available; otherwise fall back to xmessage
+chooseMessager(){
+	if [ -x /usr/bin/zenity ]; then
+		XGEN="/usr/bin/zenity --title=\"DebTop\""
+
+	else
+		XGEN="/usr/bin/xmessage -center"
+	fi
+}
+XINFO(){
+	local TEXT="$@"
+	if [ -x /usr/bin/zenity ]; then
+		$XGEN --info --text="$TEXT"
+	else
+		$XGEN "$TEXT"
+	fi
+}
+XWARN(){
+	local TEXT="$@"
+	if [ -x /usr/bin/zenity ]; then
+		$XGEN --warning --text="$TEXT"
+	else
+		$XGEN "$TEXT"
+	fi
+}
+# This function collects a string provided by the user. It will set a
+# variable XRETURN with the contents of the user input.
+XENTRY(){
+	local TEXT="$@"
+	if [ -x /usr/bin/zenity ]; then
+		XRETURN=`$XGEN --entry --text="$TEXT"`
+	else
+		#TODO: Pop up a terminal requesting the text input and write
+		# the answer to /tmp so we can read it back. The terminal can
+		# be started from inside the chrooted system
+		#
+		# Currently this will only work if debtop was started from the
+		# command line
+		read -p "$TEXT: " XRETURN
+	fi
+
+	if [ -z "$XRETURN" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+# Show Yes/No questions
+XQUESTION(){
+	local OHYEAH="$1"
+	local OHNOES="$2"
+	local TEXT="$3"
+
+	if [ -x /usr/bin/zenity ]; then
+		$XGEN --question --ok-label="$OHYEAH" --cancel-label="$OHNOES" --text="$TEXT"
+		return $?
+	else
+		$XGEN -buttons "$OHNOES:1,$OHYEAH:0" $TEXT
+		return $?
+	fi
+}
+
+
+
 createLoopDevice() {
 	if ! [ -f /tmp/debtop-loop ]; then
 		LOOPCNT=50
@@ -41,7 +107,7 @@ doMount() {
 	fi
 
 	if ! [ -f $DISK  ]; then
-		xmessage "I could NOT find your Linux disk. Please check that it exists on $DISK" 
+		XWARN "I could NOT find your Linux disk. Please check that it exists on $DISK" 
 		exit 2
 	fi
 	
@@ -57,7 +123,7 @@ doMount() {
 		elif [ $ERROR = 1 ]; then
 			echo "Filesystem contained errors but they've been fixed"
 		else
-			xmessage -buttons "Cancel:1,Mount Anyway:0" "Your image filesystem contain errors that cannot be corrected automatically. 
+			XQUESTION "Mount Anyway" "Cancel" "Your image filesystem contain errors that cannot be corrected automatically. 
 Please refer to DebTop wiki on how to manually fix the errors." || exit 6
 		fi
 
@@ -65,7 +131,7 @@ Please refer to DebTop wiki on how to manually fix the errors." || exit 6
 		sudo mount -o loop=${LOOPDEVICE}${LOOPCNT},noatime,data=journal $DISK $DEBROOT
 		if [ $? != 0 ]; then
 			doUmount
-			xmessage "Could NOT mount $DISK. Please check that your SD card is working."
+			XWARN "Could NOT mount $DISK. Please check that your SD card is working."
 			exit 3
 		fi
 	else
@@ -84,7 +150,7 @@ sysChroot() {
 
 	test -f $DEBROOT/bin/sh 
 	if [ $? != 0 ]; then
-		xmessage "Your image does not contain a valid shell!"
+		XWARN "Your image does not contain a valid shell!"
 		exit 5
 	fi
 	
@@ -155,15 +221,16 @@ startLauncherManager() {
 # Tries to automagically install a shortcut on the AWN bar to the user-specified application.
 # This will work if the user types in the command used to call the program in the linux image.
 installLauncher() {
-	NEWLAUNCHER="`zenity --title="Add a new Launcher" --entry --text='Please enter the name of the program you want to create the launcher to.'`" || exit 0
-	probeApp "$NEWLAUNCHER"
-	if ! [ -z "$APPPATH" ]; then
-		APPPATH="/`echo $APPPATH|cut -f 5- -d/`"
-		APPDESC="`zenity --title="Add a new Launcher" --entry --text='Please enter a description for the new program'`"
-		createLauncher "$NEWLAUNCHER" "$APPPATH" "$APPDESC" "$APPICON" || zenity --title="Add a new Launcher" --warning --text "We could not create a launcher to the specified program. Please make sure you don't already have a launcher for the program"
-	else
-		zenity --title="Add a new Launcher" --warning --text "We could not find the specified program in your image. Please make sure you typed its name correctly."	
-	fi
+	XQUERY "Please enter the name of the program you want to create the launcher to" || exit 0
+	probeApp "$XRETURN" || \
+		XWARN "We could not find the specified program in your image. Please make sure you typed its name correctly."
+
+	# Trim the path for use inside the chrooted system
+	APPPATH="/`echo $APPPATH|cut -f 5- -d/`"
+
+	XQUERY "Please enter a description for the new program"
+	createLauncher "$NEWLAUNCHER" "$APPPATH" "$XRETURN" "$APPICON" || \
+		XWARN "We could not create a launcher to the specified program. Please make sure you don't already have a launcher for the program"
 }
 probeApp(){
 	local APP="$1"
@@ -183,6 +250,8 @@ probeApp(){
 		APPICON=`find $DEBROOT/usr/share/icons -iname *${APP}*.png|tail -1` || \
 		APPICON=""
 		echo "$APPICON"
+	else
+		return 1
 	fi
 }
 createLauncher() {
@@ -198,7 +267,7 @@ createLauncher() {
 		APPICON=`basename $APPICON`
 	fi
 
-	local MYAPP="/usr/share/applications/debtop-"${APPNAME}".desktop"
+	local MYAPP="`echo /usr/share/applications/debtop-"${APPNAME}".desktop|tr [:upper:] [:lower:]`"
 
 	if ! [ -e "$MYAPP" ]; then
 		sudo touch "$MYAPP"
