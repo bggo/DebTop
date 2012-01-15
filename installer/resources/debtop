@@ -1,4 +1,5 @@
 #!/bin/bash
+###############################################################################
 # Debtop
 #
 # This script is the main debtop script, responsible for starting the chrooted
@@ -7,6 +8,8 @@
 # Its settings MUST be on /opt/DebTop/etc/main.cf
 #
 # Author: Diego Lima <diego@diegolima.org>
+# License: GPLv3
+###############################################################################
 
 PROGRAM="${1}"
 

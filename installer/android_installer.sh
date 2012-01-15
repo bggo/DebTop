@@ -5,6 +5,9 @@
 # This script installs the DebTop envionment on the Motorola Atrix phone. It
 # will also create the appropriate launchers on the WebTop bar to applications
 # on the Debian image.
+#
+# Author: Diego Lima <diego@diegolima.org>
+# License: GPLv3
 ###############################################################################
 if ! [ -b /dev/block/loop50 ]; then
       sudo mknod -m600 /dev/block/loop50 b 7 50
