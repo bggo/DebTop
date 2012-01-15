@@ -51,9 +51,10 @@ doMount() {
 
 		# Check the filesystem for errors
 		sudo fsck -p $DISK &>/dev/null
-		if [ $? = 0 ]; then
+		local ERROR=$?
+		if [ $ERROR = 0 ]; then
 			echo "Filesystem check completed. No errors found"
-		elif [ $? = 1 ]; then
+		elif [ $ERROR = 1 ]; then
 			echo "Filesystem contained errors but they've been fixed"
 		else
 			xmessage -buttons "Cancel:1,Mount Anyway:0" "Your image filesystem contain errors that cannot be corrected automatically. 
