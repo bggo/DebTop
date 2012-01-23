@@ -29,6 +29,7 @@ chooseMessenger(){
 }
 XINFO(){
 	local TEXT="$@"
+	killall zenity &> /dev/null
 	if [ -x /usr/bin/zenity ]; then
 		$XGEN --info --text="$TEXT"
 	else
@@ -37,6 +38,7 @@ XINFO(){
 }
 XINFONOWAIT(){
 	local TEXT="$@"
+	killall zenity &> /dev/null
 	if [ -x /usr/bin/zenity ]; then
 		$XGEN --info --text="$TEXT" &
 	else
@@ -45,6 +47,7 @@ XINFONOWAIT(){
 }
 XWARN(){
 	local TEXT="$@"
+	killall zenity &> /dev/null
 	if [ -x /usr/bin/zenity ]; then
 		$XGEN --warning --text="$TEXT"
 	else
@@ -55,6 +58,7 @@ XWARN(){
 # variable XRETURN with the contents of the user input.
 XENTRY(){
 	local TEXT="$@"
+	killall zenity &> /dev/null
 	if [ -x /usr/bin/zenity ]; then
 		XRETURN=`$XGEN --entry --text="$TEXT"`
 	else
@@ -79,6 +83,7 @@ XQUESTION(){
 	local OHNOES="$2"
 	local TEXT="$3"
 
+	killall zenity &> /dev/null
 	if [ -x /usr/bin/zenity ]; then
 		$XGEN --question --ok-label="$OHYEAH" --cancel-label="$OHNOES" --text="$TEXT"
 		return $?
@@ -158,12 +163,20 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 
 		# Make sure the mounted disk is valid or try to remount
 		test -f $DEBROOT/bin/sh
-		if [[ ( $? != 0 ) && ( $REMOUNTING != 1 ) ]]; then
-			echo "Image did not contain a valid shell. Trying to remount."
-			REMOUNTING=1
+		if [[ ( $? != 0 ) && ( $REMOUNTING -gt 2 ) ]]; then
+			# Try to remount. For some reason mount reports the disk is mounted while it isn't
+			# on the first time DebTop is started.
+			echo "Image did not contain a valid shell. Trying to remount - $REMOUNTING."
+			REMOUNTING=$(($REMOUNTING+1))
 			doUmount
 			doMount
 		elif [[ ( $? != 0 ) && ( $REMOUNTING = 1 ) ]]; then
+			>> /tmp/debtop-debug
+			sudo mount >> /tmp/debtop-debug
+			>> /tmp/debtop-debug
+			sudo df >> /tmp/debtop-debug
+			>> /tmp/debtop-debug
+			ls $DEBROOT >> /tmp/debtop-debug
 			doUmount
 			XWARN "Your image does not contain a valid shell!"
 			exit 5
@@ -172,12 +185,18 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 	else
 		# Make sure the mounted disk is valid or try to remount
 		test -f $DEBROOT/bin/sh
-		if [[ ( $? != 0 ) && ( $REMOUNTING != 1 ) ]]; then
-			echo "Image did not contain a valid shell. Trying to remount."
-			REMOUNTING=1
+		if [[ ( $? != 0 ) && ( $REMOUNTING -gt 2 ) ]]; then
+			echo "Image did not contain a valid shell. Trying to remount - $REMOUNTING."
+			REMOUNTING=$(($REMOUNTING+1))
 			doUmount
 			doMount
 		elif [[ ( $? != 0 ) && ( $REMOUNTING = 1 ) ]]; then
+			>> /tmp/debtop-debug
+			sudo mount >> /tmp/debtop-debug
+			>> /tmp/debtop-debug
+			sudo df >> /tmp/debtop-debug
+			>> /tmp/debtop-debug
+			ls $DEBROOT >> /tmp/debtop-debug
 			doUmount
 			XWARN "Your image does not contain a valid shell!"
 			exit 5
@@ -240,7 +259,8 @@ sysChroot() {
 
 doRun() {
 	local RUN="${1}"
-	sudo chroot $DEBROOT dhclient &>/dev/null
+	#sudo chroot $DEBROOT dhclient &>/dev/null
+	sudo cp /etc/resolv.conf $DEBROOT/etc/resolv.conf
 
 	# Enable dead keys support
 	if [ "x$DEADKEYS" = "xy" ]; then
@@ -248,10 +268,10 @@ doRun() {
 	fi
 
 	if ! [ -z "$RUN" ]; then
-		killall zenity
+		killall zenity &> /dev/null
 		sudo chroot $DEBROOT $RUN
 	else
-		killall zenity
+		killall zenity &> /dev/null
 		sudo chroot $DEBROOT /usr/bin/lxterminal -e pdmenu
 	fi
 }
