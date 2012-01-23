@@ -35,6 +35,14 @@ XINFO(){
 		$XGEN "$TEXT"
 	fi
 }
+XINFONOWAIT(){
+	local TEXT="$@"
+	if [ -x /usr/bin/zenity ]; then
+		$XGEN --info --text="$TEXT" &
+	else
+		$XGEN "$TEXT" &
+	fi
+}
 XWARN(){
 	local TEXT="$@"
 	if [ -x /usr/bin/zenity ]; then
@@ -240,8 +248,10 @@ doRun() {
 	fi
 
 	if ! [ -z "$RUN" ]; then
+		killall zenity
 		sudo chroot $DEBROOT $RUN
 	else
+		killall zenity
 		sudo chroot $DEBROOT /usr/bin/lxterminal -e pdmenu
 	fi
 }
@@ -351,6 +361,7 @@ elif [ "$PROGRAM" == "launcher-manager" ]; then
 	startLauncherManager
 else
 	echo "Starting DebTop"
+	XINFONOWAIT "Launching DebTop. This may take a while..."
 	doMount
 	sysChroot mount
 	doRun "$PROGRAM"
