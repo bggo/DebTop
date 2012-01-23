@@ -163,14 +163,14 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 
 		# Make sure the mounted disk is valid or try to remount
 		test -f $DEBROOT/bin/sh
-		if [[ ( $? != 0 ) && ( $REMOUNTING -gt 2 ) ]]; then
+		if [[ ( $? != 0 ) && ( $REMOUNTING < 3 ) ]]; then
 			# Try to remount. For some reason mount reports the disk is mounted while it isn't
 			# on the first time DebTop is started.
 			echo "Image did not contain a valid shell. Trying to remount - $REMOUNTING."
 			REMOUNTING=$(($REMOUNTING+1))
 			doUmount
 			doMount
-		elif [[ ( $? != 0 ) && ( $REMOUNTING = 1 ) ]]; then
+		elif [[ ( $? != 0 ) && ( $REMOUNTING = 3 ) ]]; then
 			>> /tmp/debtop-debug
 			sudo mount >> /tmp/debtop-debug
 			>> /tmp/debtop-debug
@@ -185,12 +185,12 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 	else
 		# Make sure the mounted disk is valid or try to remount
 		test -f $DEBROOT/bin/sh
-		if [[ ( $? != 0 ) && ( $REMOUNTING -gt 2 ) ]]; then
+		if [[ ( $? != 0 ) && ( $REMOUNTING < 3 ) ]]; then
 			echo "Image did not contain a valid shell. Trying to remount - $REMOUNTING."
 			REMOUNTING=$(($REMOUNTING+1))
 			doUmount
 			doMount
-		elif [[ ( $? != 0 ) && ( $REMOUNTING = 1 ) ]]; then
+		elif [[ ( $? != 0 ) && ( $REMOUNTING = 3 ) ]]; then
 			>> /tmp/debtop-debug
 			sudo mount >> /tmp/debtop-debug
 			>> /tmp/debtop-debug
