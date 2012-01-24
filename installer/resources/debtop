@@ -309,6 +309,8 @@ probeApp(){
 	local APP="$1"
 	APPPATH=""
 
+	XINFONOWAIT "Trying to set up the application. Please wait."
+	echo "Looking for an excutable..."
 	test -z $APPPATH && APPPATH=`find $DEBROOT/bin -iname "$APP"`
 	test -z $APPPATH && APPPATH=`find $DEBROOT/usr/bin -iname "$APP"`
 	test -z $APPPATH && APPPATH=`find $DEBROOT/sbin -iname "$APP"`
@@ -318,12 +320,15 @@ probeApp(){
 	if ! [ -z "$APPPATH" ]; then
 		echo "Looking for an icon..."
 		# Try to find a suitable icon for the application if it was found
-		APPICON=`find $DEBROOT/usr/share/icons -iname *${APP}*.png|grep 48x48|tail -1` || \
-		APPICON=`find $DEBROOT/usr/share/icons -iname *${APP}*.png|grep 16x16|tail -1` || \
-		APPICON=`find $DEBROOT/usr/share/icons -iname *${APP}*.png|tail -1` || \
-		APPICON=""
-		echo "$APPICON"
+		test -z "$APPICON" && APPICON=`find $DEBROOT/usr/share/icons -iname *${APP}*.png|grep 48x48|tail -1`
+		test -z "$APPICON" && APPICON=`find $DEBROOT/usr/share/icons -iname *${APP}*.png|grep 16x16|tail -1`
+		test -z "$APPICON" && APPICON=`find $DEBROOT/usr/share/icons -iname *${APP}*.png|tail -1`
+		test -z "$APPICON" && APPICON=`find $DEBROOT/usr/share -iname *${APP}*.png|tail -1`
+		test -z "$APPICON" && APPICON=`find $DEBROOT -iname *${APP}*.png|tail -1`
+		echo "Icon: $APPICON"
+		killall zenity
 	else
+		killall zenity
 		return 1
 	fi
 }
@@ -331,6 +336,7 @@ createLauncher() {
 	local APPNAME="$1"
 	local APPDEST="$2"
 	local APPICON="$3"
+	echo "Creating launcher for $APPNAME - $APPDEST - $APPICON"
 
 	# Never trust others
 	test -z "$APPNAME" && return 1
