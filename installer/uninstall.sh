@@ -16,7 +16,7 @@ echo "Looking for a DebTop Instalation."
 if [ -d /opt/DebTop ]; then
 	echo ""
 	echo "DebTop found /opt/DebTop . . . . removing"
-	sudo rm -rf opt/DebTop
+	/usr/bin/sudo rm -rf opt/DebTop
 else
 	echo "No DebTop instalation found .... "
 fi
@@ -26,9 +26,6 @@ echo "Fixing tomoyo config."
 if [ -a /etc/tomoyo.DebTop.orig ]; then
 	echo ""
 	echo "Original config found, rewriting . . . "
-	sudo mv /etc/tomoyo /etc/tomoyo.DebTop.mod
-	sudo mv /etc/tomoyo.DebTop.orig /etc/tomoyo && sudo rm -Rf /etc/tomoyo.DebTop.mod
+	/usr/bin/sudo mv /etc/tomoyo /etc/tomoyo.DebTop.mod
+	/usr/bin/sudo mv /etc/tomoyo.DebTop.orig /etc/tomoyo && /usr/bin/sudo rm -Rf /etc/tomoyo.DebTop.mod
 fi
-
-
-

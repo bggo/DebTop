@@ -102,7 +102,7 @@ if ! [ -b /dev/mmcblk1p2 ]; then
 	fi
 else
 	echo "Partitioned SD Card found. Mounting on /opt/DebTop/media"
-	mount /dev/mmcblk1p2 /opt/DebTop/media
+	/usr/bin/sudo /bin/mount /dev/mmcblk1p2 /opt/DebTop/media
 	/usr/bin/sudo chmod -R a+r /opt/DebTop/media/*
 	test -f /opt/DebTop/media/DebTop/linuxdisk || exit 1
 	if [ -L /opt/DebTop/linuxdisk ]; then
@@ -151,9 +151,9 @@ Type=Application" > /usr/share/applications/debtop-lm.desktop
 EXTRA="$EXTRA,/usr/share/applications/debtop-lm.desktop"
 /usr/bin/sudo chmod 644 /usr/share/applications/debtop-lm.desktop
 
-LAUNCHERS=`gconftool -g /apps/avant-window-navigator/window_manager/launchers|cut -f2 -d[|cut -f1 -d]`
+LAUNCHERS=`/usr/bin/gconftool -g /apps/avant-window-navigator/window_manager/launchers|cut -f2 -d[|cut -f1 -d]`
 LAUNCHERS=`echo $LAUNCHERS,$EXTRA`
-gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string
+/usr/bin/gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string
 
 echo ""
 echo "Do you want to add extra software in the apps bar?"
