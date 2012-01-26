@@ -23,10 +23,11 @@ fi
 
 echo ""
 echo "Fixing tomoyo config."
-if [ -a /etc/tomoyo/domain_policy.conf.DebTop.orig ]; then
+if [ -a /etc/tomoyo.DebTop.orig ]; then
 	echo ""
 	echo "Original config found, rewriting . . . "
-	sudo mv /etc/tomoyo/domain_policy.conf.DebTop.orig cp /etc/tomoyo/domain_policy.conf
+	sudo mv /etc/tomoyo /etc/tomoyo.DebTop.mod
+	sudo mv /etc/tomoyo.DebTop.orig /etc/tomoyo && sudo rm -Rf /etc/tomoyo.DebTop.mod
 fi
 
 
