@@ -162,5 +162,5 @@ echo "y/[N]"
 read PLUS
 if [ -z $PLUS ]; then PLUS="y"; fi
 if [ $PLUS = "y" ]; then
-	bash extras.sh
+	. resources/extras.sh
 fi
