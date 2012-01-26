@@ -9,6 +9,8 @@
 # Author: Diego Lima <diego@diegolima.org>
 # License: GPLv3
 ###############################################################################
+test -x /usr/bin/sudo || exit 1
+
 if ! [ -b /dev/block/loop50 ]; then
       /usr/bin/sudo mknod -m600 /dev/block/loop50 b 7 50
 fi
