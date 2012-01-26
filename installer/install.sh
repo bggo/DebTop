@@ -48,21 +48,25 @@ if ! [ -d /opt/DebTop/etc ]; then
 	sudo chown adas.adas /opt/DebTop/etc
 fi
 
-echo ""
-echo "Do you want me to disable Tomoyo? If unsure just say yes."
-echo "[Y]/n"
-read DIS_TOMOYO
-if [ -z $DIS_TOMOYO ]; then DIS_TOMOYO="y"; fi
-DIS_TOMOYO=`echo $DIS_TOMOYO|cut -c1|tr [:upper:] [:lower:]` 
-
-if [ "$DIS_TOMOYO" = "y" ]; then
-	echo "Disabling Tomoyo..."
-	sudo cp /etc/tomoyo/domain_policy.conf /etc/tomoyo/domain_policy.conf.DebTop.orig
-	sudo cp /etc/tomoyo/domain_policy.conf /etc/tomoyo/domain_policy.conf.DebTop.`date +%Y%m%d%H%M`
-	sudo sed 's/use_profile 3/use_profile 0/g' /etc/tomoyo/domain_policy.conf > /etc/tomoyo/domain_policy.conf.tmp || exit 2
-	sudo mv /etc/tomoyo/domain_policy.conf.tmp /etc/tomoyo/domain_policy.conf
-	echo "Tomoyo has been disabled. You'll need to turn your phone off and then on again after we're finished"
-fi
+###############################################################################
+# WARNING! Here Be Dragons
+# This feature might have caused at least one phone to become unusable
+###############################################################################
+#echo ""
+#echo "Do you want me to disable Tomoyo? If unsure just say yes."
+#echo "[Y]/n"
+#read DIS_TOMOYO
+#if [ -z $DIS_TOMOYO ]; then DIS_TOMOYO="y"; fi
+#DIS_TOMOYO=`echo $DIS_TOMOYO|cut -c1|tr [:upper:] [:lower:]` 
+#
+#if [ "$DIS_TOMOYO" = "y" ]; then
+#	echo "Disabling Tomoyo..."
+#	sudo cp /etc/tomoyo/domain_policy.conf /etc/tomoyo/domain_policy.conf.DebTop.orig
+#	sudo cp /etc/tomoyo/domain_policy.conf /etc/tomoyo/domain_policy.conf.DebTop.`date +%Y%m%d%H%M`
+#	sudo sed 's/use_profile 3/use_profile 0/g' /etc/tomoyo/domain_policy.conf > /etc/tomoyo/domain_policy.conf.tmp || exit 2
+#	sudo mv /etc/tomoyo/domain_policy.conf.tmp /etc/tomoyo/domain_policy.conf
+#	echo "Tomoyo has been disabled. You'll need to turn your phone off and then on again after we're finished"
+#fi
 
 ############################# Populate Settings ###############################
 > /opt/DebTop/etc/main.cf
@@ -74,7 +78,7 @@ echo "This is often desirable if you plan to write in any language other than en
 echo "y/[N]"
 read DEADKEYS
 if [ -z $DEADKEYS ]; then DEADKEYS="n"; fi
-DEADKEYS=`echo $DEADKEYS|cut -c1|tc [:upper:] [:lower:]`
+DEADKEYS=`echo $DEADKEYS|cut -c1|tr [:upper:] [:lower:]`
 
 if [ $DEADKEYS = "y" ]; then
 	echo "Enabling dead keys support"
