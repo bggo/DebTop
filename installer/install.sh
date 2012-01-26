@@ -10,42 +10,42 @@
 # License: GPLv3
 ###############################################################################
 if ! [ -b /dev/block/loop50 ]; then
-      sudo mknod -m600 /dev/block/loop50 b 7 50
+      /usr/bin/sudo mknod -m600 /dev/block/loop50 b 7 50
 fi
 
 if ! [ -d /opt/DebTop ]; then
 	echo "Creating /opt/DebTop"
-	sudo mkdir -p /opt/DebTop
-	sudo chmod 755 /opt/DebTop
-	sudo chown adas.adas /opt/DebTop
+	/usr/bin/sudo mkdir -p /opt/DebTop
+	/usr/bin/sudo chmod 755 /opt/DebTop
+	/usr/bin/sudo chown adas.adas /opt/DebTop
 fi
 if ! [ -d /opt/DebTop/media ]; then
 	echo "Creating /opt/DebTop/media"
-	sudo mkdir -p /opt/DebTop/media
-	sudo chmod 755 /opt/DebTop/media
-	sudo chown adas.adas /opt/DebTop/media
+	/usr/bin/sudo mkdir -p /opt/DebTop/media
+	/usr/bin/sudo chmod 755 /opt/DebTop/media
+	/usr/bin/sudo chown adas.adas /opt/DebTop/media
 fi
 if ! [ -d /opt/DebTop/root ]; then
 	echo "Creating /opt/DebTop/root"
-	sudo mkdir -p /opt/DebTop/root
-	sudo chmod 755 /opt/DebTop/root
-	sudo chown adas.adas /opt/DebTop/root
+	/usr/bin/sudo mkdir -p /opt/DebTop/root
+	/usr/bin/sudo chmod 755 /opt/DebTop/root
+	/usr/bin/sudo chown adas.adas /opt/DebTop/root
 fi
 if ! [ -d /opt/DebTop/icons ]; then
 	echo "Creating /opt/DebTop/icons"
-	sudo mkdir -p /opt/DebTop/icons
-	sudo chmod 755 /opt/DebTop/icons
-	sudo chown adas.adas /opt/DebTop/icons
+	/usr/bin/sudo mkdir -p /opt/DebTop/icons
+	/usr/bin/sudo chmod 755 /opt/DebTop/icons
+	/usr/bin/sudo chown adas.adas /opt/DebTop/icons
 
-	sudo cp resources/debian.png /opt/DebTop/icons
-	sudo chmod 644 /opt/DebTop/icons/debian.png
-	sudo chown adas.adas /opt/DebTop/icons/debian.png
+	/usr/bin/sudo cp resources/debian.png /opt/DebTop/icons
+	/usr/bin/sudo chmod 644 /opt/DebTop/icons/debian.png
+	/usr/bin/sudo chown adas.adas /opt/DebTop/icons/debian.png
 fi
 if ! [ -d /opt/DebTop/etc ]; then
 	echo "Creating /opt/DebTop/etc"
-	sudo mkdir -p /opt/DebTop/etc
-	sudo chmod 755 /opt/DebTop/etc
-	sudo chown adas.adas /opt/DebTop/etc
+	/usr/bin/sudo mkdir -p /opt/DebTop/etc
+	/usr/bin/sudo chmod 755 /opt/DebTop/etc
+	/usr/bin/sudo chown adas.adas /opt/DebTop/etc
 fi
 
 echo ""
@@ -57,14 +57,14 @@ DIS_TOMOYO=`echo $DIS_TOMOYO|cut -c1|tr [:upper:] [:lower:]`
 
 if [ "$DIS_TOMOYO" = "y" ]; then
 	echo "Disabling Tomoyo..."
-	sudo mv /etc/tomoyo /etc/tomoyo.DebTop.orig
-	sudo cp -r resources/tomoyo /etc
-	sudo chown root.root -R /etc/tomoyo && echo "Tomoyo has been disabled. You'll need to turn your phone off and then on again after we're finished"
+	/usr/bin/sudo mv /etc/tomoyo /etc/tomoyo.DebTop.orig
+	/usr/bin/sudo cp -r resources/tomoyo /etc
+	/usr/bin/sudo chown root.root -R /etc/tomoyo && echo "Tomoyo has been disabled. You'll need to turn your phone off and then on again after we're finished"
 fi
 
 ############################# Populate Settings ###############################
 > /opt/DebTop/etc/main.cf
-sudo chmod 666 /opt/DebTop/etc/main.cf
+/usr/bin/sudo chmod 666 /opt/DebTop/etc/main.cf
 
 echo ""
 echo "Do you want to enable accented characters (dead keys support)?"
@@ -84,15 +84,15 @@ if ! [ -b /dev/mmcblk1p2 ]; then
 	echo "We will not support DebTop systems larger than 4gb"
 	if [ -f /sdcard/DebTop/linuxdisk ]; then
 		if [ -L /opt/DebTop/linuxdisk ]; then
-			sudo rm /opt/DebTop/linuxdisk
+			/usr/bin/sudo rm /opt/DebTop/linuxdisk
 		fi
-		sudo ln -s /sdcard/DebTop/linuxdisk /opt/DebTop/linuxdisk
+		/usr/bin/sudo ln -s /sdcard/DebTop/linuxdisk /opt/DebTop/linuxdisk
 		echo "DISK=/sdcard/DebTop/linuxdisk" >> /opt/DebTop/etc/main.cf
 	elif [ -f /sdcard-ext/DebTop/linuxdisk ]; then
 		if [ -L /opt/DebTop/linuxdisk ]; then
-			sudo rm /opt/DebTop/linuxdisk
+			/usr/bin/sudo rm /opt/DebTop/linuxdisk
 		fi
-		sudo ln -s /sdcard-ext/DebTop/linuxdisk /opt/DebTop/linuxdisk
+		/usr/bin/sudo ln -s /sdcard-ext/DebTop/linuxdisk /opt/DebTop/linuxdisk
 		echo "DISK=/sdcard-ext/DebTop/linuxdisk" >> /opt/DebTop/etc/main.cf
 	else
 		echo "No image found!"
@@ -101,12 +101,12 @@ if ! [ -b /dev/mmcblk1p2 ]; then
 else
 	echo "Partitioned SD Card found. Mounting on /opt/DebTop/media"
 	mount /dev/mmcblk1p2 /opt/DebTop/media
-	sudo chmod -R a+r /opt/DebTop/media/*
+	/usr/bin/sudo chmod -R a+r /opt/DebTop/media/*
 	test -f /opt/DebTop/media/DebTop/linuxdisk || exit 1
 	if [ -L /opt/DebTop/linuxdisk ]; then
-		sudo rm /opt/DebTop/linuxdisk
+		/usr/bin/sudo rm /opt/DebTop/linuxdisk
 	fi
-	sudo ln -s /opt/DebTop/media/DebTop/linuxdisk /opt/DebTop/linuxdisk
+	/usr/bin/sudo ln -s /opt/DebTop/media/DebTop/linuxdisk /opt/DebTop/linuxdisk
 	echo "SDPART=/dev/mmcblk1p2" >> /opt/DebTop/etc/main.cf
 	echo "DISK=/opt/DebTop/media/DebTop/linuxdisk" >> /opt/DebTop/etc/main.cf
 fi
@@ -115,13 +115,13 @@ echo "MEDIA=/opt/DebTop/media" >>  /opt/DebTop/etc/main.cf
 echo "DEBROOT=/opt/DebTop/root" >> /opt/DebTop/etc/main.cf
 echo "LOOPDEVICE=/dev/block/loop50" >> /opt/DebTop/etc/main.cf
 
-sudo chown root.root /opt/DebTop/etc/main.cf
-sudo chmod 644 /opt/DebTop/etc/main.cf
+/usr/bin/sudo chown root.root /opt/DebTop/etc/main.cf
+/usr/bin/sudo chmod 644 /opt/DebTop/etc/main.cf
 
 echo "Creating DebTop launcher"
-sudo cp resources/debtop /usr/sbin
-sudo touch /usr/share/applications/debtop.desktop
-sudo chmod 666 /usr/share/applications/debtop.desktop
+/usr/bin/sudo cp resources/debtop /usr/sbin
+/usr/bin/sudo touch /usr/share/applications/debtop.desktop
+/usr/bin/sudo chmod 666 /usr/share/applications/debtop.desktop
 echo "[Desktop Entry]
 Encoding=UTF-8
 Name=DebTop
@@ -132,11 +132,11 @@ Exec=/usr/sbin/debtop
 Icon=/opt/DebTop/icons/debian.png
 Type=Application" > /usr/share/applications/debtop.desktop
 EXTRA="/usr/share/applications/debtop.desktop"
-sudo chmod 644 /usr/share/applications/debtop.desktop
+/usr/bin/sudo chmod 644 /usr/share/applications/debtop.desktop
 
 echo "Creating DebTop LM launcher"
-sudo touch /usr/share/applications/debtop-lm.desktop
-sudo chmod 666 /usr/share/applications/debtop-lm.desktop
+/usr/bin/sudo touch /usr/share/applications/debtop-lm.desktop
+/usr/bin/sudo chmod 666 /usr/share/applications/debtop-lm.desktop
 echo "[Desktop Entry]
 Encoding=UTF-8
 Name=DebTopLM
@@ -147,7 +147,7 @@ Exec=/usr/sbin/debtop launcher-manager
 Icon=/opt/DebTop/icons/debian.png
 Type=Application" > /usr/share/applications/debtop-lm.desktop
 EXTRA="$EXTRA,/usr/share/applications/debtop-lm.desktop"
-sudo chmod 644 /usr/share/applications/debtop-lm.desktop
+/usr/bin/sudo chmod 644 /usr/share/applications/debtop-lm.desktop
 
 LAUNCHERS=`gconftool -g /apps/avant-window-navigator/window_manager/launchers|cut -f2 -d[|cut -f1 -d]`
 LAUNCHERS=`echo $LAUNCHERS,$EXTRA`

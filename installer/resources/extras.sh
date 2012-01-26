@@ -12,14 +12,14 @@
 
 ############################### Extras ########################################
 echo "Probing for additional software in your disk"
-sudo mount -o loop=/dev/block/loop50 /opt/DebTop/linuxdisk /mnt || exit 1
+/usr/bin/sudo mount -o loop=/dev/block/loop50 /opt/DebTop/linuxdisk /mnt || exit 1
 
 
 #----------------------------- lxterminal  ------------------------------------
 if [ -x /mnt/usr/bin/lxterminal ]; then
-	sudo cp /mnt/usr/share/pixmaps/lxterminal.png /opt/DebTop/icons/lxterminal.png
-	sudo touch /usr/share/applications/debtop-lxterminal.desktop
-	sudo chmod 666 /usr/share/applications/debtop-lxterminal.desktop
+	/usr/bin/sudo cp /mnt/usr/share/pixmaps/lxterminal.png /opt/DebTop/icons/lxterminal.png
+	/usr/bin/sudo touch /usr/share/applications/debtop-lxterminal.desktop
+	/usr/bin/sudo chmod 666 /usr/share/applications/debtop-lxterminal.desktop
 	echo "[Desktop Entry]
 Encoding=UTF-8
 Name=lxterminal
@@ -29,16 +29,16 @@ TryExec=/usr/sbin/debtop lxterminal
 Exec=/usr/sbin/debtop lxterminal
 Icon=/opt/DebTop/icons/lxterminal.png
 Type=Application" > /usr/share/applications/debtop-lxterminal.desktop
-	sudo chmod 644 /usr/share/applications/debtop-lxterminal.desktop
+	/usr/bin/sudo chmod 644 /usr/share/applications/debtop-lxterminal.desktop
 	EXTRA="$EXTRA,/usr/share/applications/debtop-lxterminal.desktop"
 	echo "lxterminal"
 fi
 
 #----------------------------- Iceweasel --------------------------------------
 if [ -x /mnt/usr/bin/iceweasel ]; then
-	sudo cp /mnt/usr/share/icons/hicolor/48x48/apps/iceweasel.png /opt/DebTop/icons/iceweasel.png
-	sudo touch /usr/share/applications/debtop-iceweasel.desktop
-	sudo chmod 666 /usr/share/applications/debtop-iceweasel.desktop
+	/usr/bin/sudo cp /mnt/usr/share/icons/hicolor/48x48/apps/iceweasel.png /opt/DebTop/icons/iceweasel.png
+	/usr/bin/sudo touch /usr/share/applications/debtop-iceweasel.desktop
+	/usr/bin/sudo chmod 666 /usr/share/applications/debtop-iceweasel.desktop
 	echo "[Desktop Entry]
 Encoding=UTF-8
 Name=Iceweasel
@@ -48,7 +48,7 @@ TryExec=/usr/sbin/debtop iceweasel
 Exec=/usr/sbin/debtop iceweasel
 Icon=/opt/DebTop/icons/iceweasel.png
 Type=Application" > /usr/share/applications/debtop-iceweasel.desktop
-	sudo chmod 644 /usr/share/applications/debtop-iceweasel.desktop
+	/usr/bin/sudo chmod 644 /usr/share/applications/debtop-iceweasel.desktop
 	EXTRA="$EXTRA,/usr/share/applications/debtop-iceweasel.desktop"
 	echo "iceweasel"
 fi
@@ -56,9 +56,9 @@ fi
 
 #----------------------------- Libreoffice ------------------------------------
 if [ -x /mnt/usr/bin/libreoffice ]; then
-	sudo cp /mnt/usr/share/icons/hicolor/128x128/apps/libreoffice34-startcenter.png /opt/DebTop/icons/libreoffice.png
-	sudo touch /usr/share/applications/debtop-libreoffice.desktop
-	sudo chmod 666 /usr/share/applications/debtop-libreoffice.desktop
+	/usr/bin/sudo cp /mnt/usr/share/icons/hicolor/128x128/apps/libreoffice34-startcenter.png /opt/DebTop/icons/libreoffice.png
+	/usr/bin/sudo touch /usr/share/applications/debtop-libreoffice.desktop
+	/usr/bin/sudo chmod 666 /usr/share/applications/debtop-libreoffice.desktop
 	echo "[Desktop Entry]
 Encoding=UTF-8
 Name=Libreoffice
@@ -68,7 +68,7 @@ TryExec=/usr/sbin/debtop libreoffice
 Exec=/usr/sbin/debtop libreoffice
 Icon=/opt/DebTop/icons/libreoffice.png
 Type=Application" > /usr/share/applications/debtop-libreoffice.desktop
-	sudo chmod 644 /usr/share/applications/debtop-libreoffice.desktop
+	/usr/bin/sudo chmod 644 /usr/share/applications/debtop-libreoffice.desktop
 	EXTRA="$EXTRA,/usr/share/applications/debtop-libreoffice.desktop"
 	echo "libreoffice"
 fi
@@ -76,9 +76,9 @@ fi
 
 #----------------------------- Transmission ----------------------------------
 if [ -x /mnt/usr/bin/transmission-gtk ]; then
-	sudo cp /mnt/usr/share/icons/hicolor/48x48/apps/transmission.png /opt/DebTop/icons/transmission.png
-	sudo touch /usr/share/applications/debtop-transmission.desktop
-	sudo chmod 666 /usr/share/applications/debtop-transmission.desktop
+	/usr/bin/sudo cp /mnt/usr/share/icons/hicolor/48x48/apps/transmission.png /opt/DebTop/icons/transmission.png
+	/usr/bin/sudo touch /usr/share/applications/debtop-transmission.desktop
+	/usr/bin/sudo chmod 666 /usr/share/applications/debtop-transmission.desktop
 	echo "[Desktop Entry]
 Encoding=UTF-8
 Name=Transmission
@@ -88,16 +88,16 @@ TryExec=/usr/sbin/debtop transmission-gtk
 Exec=/usr/sbin/debtop transmission-gtk
 Icon=/opt/DebTop/icons/transmission.png
 Type=Application" > /usr/share/applications/debtop-transmission.desktop
-	sudo chmod 644 /usr/share/applications/debtop-transmission.desktop
+	/usr/bin/sudo chmod 644 /usr/share/applications/debtop-transmission.desktop
 	EXTRA="$EXTRA,/usr/share/applications/debtop-transmission.desktop"
 	echo "transmission"
 fi
 
 #---------------------------- Screenshot -------------------------------------
 if [ -x /mnt/usr/bin/xfce4-screenshooter ]; then
-	sudo cp /mnt/usr/share/icons/hicolor/48x48/apps/applets-screenshooter.png /opt/DebTop/icons/screenshot.png
-	sudo touch /usr/share/applications/debtop-screenshot.desktop
-	sudo chmod 666 /usr/share/applications/debtop-screenshot.desktop
+	/usr/bin/sudo cp /mnt/usr/share/icons/hicolor/48x48/apps/applets-screenshooter.png /opt/DebTop/icons/screenshot.png
+	/usr/bin/sudo touch /usr/share/applications/debtop-screenshot.desktop
+	/usr/bin/sudo chmod 666 /usr/share/applications/debtop-screenshot.desktop
 	echo "[Desktop Entry]
 Encoding=UTF-8
 Name=Screenshot
@@ -107,16 +107,16 @@ TryExec=/usr/sbin/debtop xfce4-screenshooter
 Exec=/usr/sbin/debtop xfce4-screenshooter
 Icon=/opt/DebTop/icons/screenshot.png
 Type=Application" > /usr/share/applications/debtop-screenshot.desktop
-	sudo chmod 644 /usr/share/applications/debtop-screenshot.desktop
+	/usr/bin/sudo chmod 644 /usr/share/applications/debtop-screenshot.desktop
 	EXTRA="$EXTRA,/usr/share/applications/debtop-screenshot.desktop"
 	echo "xfce4-screenshooter"
 fi
 
 #--------------------------------- Synaptic -----------------------------------
 if [ -x /mnt/usr/sbin/synaptic ]; then
-	sudo cp icon 
-	sudo touch /usr/share/applications/debtop-synaptic.desktop
-	sudo chmod 666 /usr/share/applications/debtop-synaptic.desktop
+	/usr/bin/sudo cp icon 
+	/usr/bin/sudo touch /usr/share/applications/debtop-synaptic.desktop
+	/usr/bin/sudo chmod 666 /usr/share/applications/debtop-synaptic.desktop
 	echo "[Desktop Entry]
 Encoding=UTF-8
 Name=Screenshot
@@ -126,13 +126,13 @@ TryExec=/usr/sbin/debtop synaptic
 Exec=/usr/sbin/debtop synaptic
 Icon=/opt/DebTop/icons/synaptic.png
 Type=Application" > /usr/share/applications/debtop-synaptic.desktop
-	sudo chmod 644 /usr/share/applications/debtop-synaptic.desktop
+	/usr/bin/sudo chmod 644 /usr/share/applications/debtop-synaptic.desktop
         EXTRA="$EXTRA,/usr/share/applications/debtop-synaptic.desktop"
 	echo "synaptic"
 fi
 
 
-sudo umount /mnt
+/usr/bin/sudo umount /mnt
 
 LAUNCHERS=`gconftool -g /apps/avant-window-navigator/window_manager/launchers|cut -f2 -d[|cut -f1 -d]`
 LAUNCHERS=`echo $LAUNCHERS,$EXTRA`

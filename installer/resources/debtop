@@ -102,21 +102,21 @@ createLoopDevice() {
 		LOOPCNT=`cat /tmp/debtop-loop`
 		LOOPCNT=$(($LOOPCNT+1))
 	fi
-	sudo rm /tmp/debtop-loop
+	/usr/bin/sudo rm /tmp/debtop-loop
 	echo $LOOPCNT > /tmp/debtop-loop
 
 	if ! [ -b ${LOOPDEVICE}${LOOPCNT} ]; then
-		sudo mknod -m600 ${LOOPDEVICE}${LOOPCNT} b 7 $LOOPCNT
+		/usr/bin/sudo mknod -m600 ${LOOPDEVICE}${LOOPCNT} b 7 $LOOPCNT
         fi
 }
 
 doMount() {
 	# Check if we're using an alternate partition on the SD card
 	if ! [ -z $SDPART ]; then
-		sudo mount | grep $SDPART &>/dev/null
+		/usr/bin/sudo mount | grep $SDPART &>/dev/null
 		if [ $? != 0 ]; then
 			echo "Mounting $SDPART on $MEDIA"
-			sudo mount $SDPART $MEDIA || exit 1
+			/usr/bin/sudo mount $SDPART $MEDIA || exit 1
 		else
 			true
 		fi
@@ -127,12 +127,12 @@ doMount() {
 		exit 2
 	fi
 	
-	sudo mount | grep $DEBROOT &>/dev/null
+	/usr/bin/sudo mount | grep $DEBROOT &>/dev/null
 	if [ $? != 0 ]; then
 		createLoopDevice
 
 		# Check the filesystem for errors
-		sudo fsck -v -p $DISK
+		/usr/bin/sudo fsck -v -p $DISK
 		local ERROR=$?
 		if [ $ERROR = 0 ]; then
 			echo "Filesystem check completed. No errors found"
@@ -143,7 +143,7 @@ doMount() {
 
 We can try to fix them and mount anyway, or you can check the wiki and try to manually fix the disk yourself."  
 			if [ $? == 0 ]; then 
-				sudo fsck -v -y $DISK 
+				/usr/bin/sudo fsck -v -y $DISK 
 				if [ $? -gt 2 ]; then	
 					XWARN "We could NOT fix your disk automatically. Please refer to the wiki on how to manually fix your disk."
 					exit 7
@@ -154,7 +154,7 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 		fi
 
 		echo "Mounting $DISK on $DEBROOT using ${LOOPDEVICE}${LOOPCNT}"
-		sudo mount -o loop=${LOOPDEVICE}${LOOPCNT},noatime,data=journal $DISK $DEBROOT
+		/usr/bin/sudo mount -o loop=${LOOPDEVICE}${LOOPCNT},noatime,data=journal $DISK $DEBROOT
 		if [ $? != 0 ]; then
 			doUmount
 			XWARN "Could NOT mount $DISK. Please check that your SD card is working."
@@ -172,9 +172,9 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 			doMount
 		elif [[ ( $? != 0 ) && ( $REMOUNTING = 3 ) ]]; then
 			>> /tmp/debtop-debug
-			sudo mount >> /tmp/debtop-debug
+			/usr/bin/sudo mount >> /tmp/debtop-debug
 			>> /tmp/debtop-debug
-			sudo df >> /tmp/debtop-debug
+			/usr/bin/sudo df >> /tmp/debtop-debug
 			>> /tmp/debtop-debug
 			ls $DEBROOT >> /tmp/debtop-debug
 			doUmount
@@ -192,9 +192,9 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 			doMount
 		elif [[ ( $? != 0 ) && ( $REMOUNTING = 3 ) ]]; then
 			>> /tmp/debtop-debug
-			sudo mount >> /tmp/debtop-debug
+			/usr/bin/sudo mount >> /tmp/debtop-debug
 			>> /tmp/debtop-debug
-			sudo df >> /tmp/debtop-debug
+			/usr/bin/sudo df >> /tmp/debtop-debug
 			>> /tmp/debtop-debug
 			ls $DEBROOT >> /tmp/debtop-debug
 			doUmount
@@ -204,63 +204,63 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 	fi
 }
 doUmount() {
-	for i in `sudo mount|grep $DEBROOT|awk '{print $3}'|tac`; do
-		sudo umount -l $i &> /dev/null
+	for i in `/usr/bin/sudo mount|grep $DEBROOT|awk '{print $3}'|tac`; do
+		/usr/bin/sudo umount -l $i &> /dev/null
 	done
 }
 
 sysChroot() {
-	ACTION="sudo mount -o bind"
+	ACTION="/usr/bin/sudo mount -o bind"
 
-	test -d $DEBROOT/proc || sudo mkdir -p $DEBROOT/proc
-	sudo mount | grep $DEBROOT/proc &>/dev/null|| \
-		sudo $ACTION /proc $DEBROOT/proc &>/dev/null
+	test -d $DEBROOT/proc || /usr/bin/sudo mkdir -p $DEBROOT/proc
+	/usr/bin/sudo mount | grep $DEBROOT/proc &>/dev/null|| \
+		/usr/bin/sudo $ACTION /proc $DEBROOT/proc &>/dev/null
 
-	test -d $DEBROOT/dev || sudo mkdir -p $DEBROOT/dev
-	sudo mount | grep $DEBROOT/dev &>/dev/null|| \
-		sudo $ACTION /dev  $DEBROOT/dev &>/dev/null
+	test -d $DEBROOT/dev || /usr/bin/sudo mkdir -p $DEBROOT/dev
+	/usr/bin/sudo mount | grep $DEBROOT/dev &>/dev/null|| \
+		/usr/bin/sudo $ACTION /dev  $DEBROOT/dev &>/dev/null
 	
-	test -d $DEBROOT/dev/pts || sudo mkdir -p $DEBROOT/dev/pts
-	sudo mount | grep $DEBROOT/dev/pts &>/dev/null|| \
-		sudo $ACTION /dev/pts $DEBROOT/dev/pts &>/dev/null
+	test -d $DEBROOT/dev/pts || /usr/bin/sudo mkdir -p $DEBROOT/dev/pts
+	/usr/bin/sudo mount | grep $DEBROOT/dev/pts &>/dev/null|| \
+		/usr/bin/sudo $ACTION /dev/pts $DEBROOT/dev/pts &>/dev/null
 
-	test -d $DEBROOT/dev/shm || sudo mkdir -p $DEBROOT/dev/shm
-	sudo mount | grep $DEBROOT/dev/shm &>/dev/null|| \
-		sudo $ACTION /dev/shm $DEBROOT/dev/shm &>/dev/null
+	test -d $DEBROOT/dev/shm || /usr/bin/sudo mkdir -p $DEBROOT/dev/shm
+	/usr/bin/sudo mount | grep $DEBROOT/dev/shm &>/dev/null|| \
+		/usr/bin/sudo $ACTION /dev/shm $DEBROOT/dev/shm &>/dev/null
 
-	test -d $DEBROOT/sys || sudo mkdir -p $DEBROOT/sys
-	sudo mount | grep $DEBROOT/sys &>/dev/null|| \
-		sudo $ACTION /sys  $DEBROOT/sys &>/dev/null
+	test -d $DEBROOT/sys || /usr/bin/sudo mkdir -p $DEBROOT/sys
+	/usr/bin/sudo mount | grep $DEBROOT/sys &>/dev/null|| \
+		/usr/bin/sudo $ACTION /sys  $DEBROOT/sys &>/dev/null
 
-	test -d $DEBROOT/tmp || sudo mkdir -p $DEBROOT/tmp
-	sudo mount | grep $DEBROOT/tmp &>/dev/null|| \
-		sudo $ACTION /tmp  $DEBROOT/tmp &>/dev/null
+	test -d $DEBROOT/tmp || /usr/bin/sudo mkdir -p $DEBROOT/tmp
+	/usr/bin/sudo mount | grep $DEBROOT/tmp &>/dev/null|| \
+		/usr/bin/sudo $ACTION /tmp  $DEBROOT/tmp &>/dev/null
 
-	test -d $DEBROOT/var/tmp || sudo mkdir -p $DEBROOT/var/tmp
-	sudo mount | grep $DEBROOT/var/tmp &>/dev/null|| \
-		sudo $ACTION /var/tmp $DEBROOT/var/tmp &>/dev/null
+	test -d $DEBROOT/var/tmp || /usr/bin/sudo mkdir -p $DEBROOT/var/tmp
+	/usr/bin/sudo mount | grep $DEBROOT/var/tmp &>/dev/null|| \
+		/usr/bin/sudo $ACTION /var/tmp $DEBROOT/var/tmp &>/dev/null
 
-	test -d $DEBROOT/var/run/dbus || sudo mkdir -p $DEBROOT/var/run/dbus
-	sudo mount | grep $DEBROOT/var/run/dbus &>/dev/null|| \
-		sudo $ACTION /var/run/dbus $DEBROOT/var/run/dbus &>/dev/null
+	test -d $DEBROOT/var/run/dbus || /usr/bin/sudo mkdir -p $DEBROOT/var/run/dbus
+	/usr/bin/sudo mount | grep $DEBROOT/var/run/dbus &>/dev/null|| \
+		/usr/bin/sudo $ACTION /var/run/dbus $DEBROOT/var/run/dbus &>/dev/null
 
-	test -d $DEBROOT/media/sdcard || sudo mkdir -p $DEBROOT/media/sdcard
-	sudo mount | grep $DEBROOT/media/sdcard &>/dev/null|| \
-		sudo $ACTION /sdcard $DEBROOT/media/sdcard &>/dev/null
+	test -d $DEBROOT/media/sdcard || /usr/bin/sudo mkdir -p $DEBROOT/media/sdcard
+	/usr/bin/sudo mount | grep $DEBROOT/media/sdcard &>/dev/null|| \
+		/usr/bin/sudo $ACTION /sdcard $DEBROOT/media/sdcard &>/dev/null
 
-	test -d $DEBROOT/media/sdcard-ext || sudo mkdir -p $DEBROOT/media/sdcard-ext
-	sudo mount | grep $DEBROOT/media/sdcard-ext &>/dev/null|| \
-		sudo $ACTION /sdcard-ext $DEBROOT/media/sdcard-ext &>/dev/null
+	test -d $DEBROOT/media/sdcard-ext || /usr/bin/sudo mkdir -p $DEBROOT/media/sdcard-ext
+	/usr/bin/sudo mount | grep $DEBROOT/media/sdcard-ext &>/dev/null|| \
+		/usr/bin/sudo $ACTION /sdcard-ext $DEBROOT/media/sdcard-ext &>/dev/null
 
-	test -d $DEBROOT/home/adas || sudo mkdir -p $DEBROOT/home/adas
-	sudo mount | grep $DEBROOT/home/adas &>/dev/null|| \
-		sudo $ACTION /home/adas $DEBROOT/home/adas
+	test -d $DEBROOT/home/adas || /usr/bin/sudo mkdir -p $DEBROOT/home/adas
+	/usr/bin/sudo mount | grep $DEBROOT/home/adas &>/dev/null|| \
+		/usr/bin/sudo $ACTION /home/adas $DEBROOT/home/adas
 }
 
 doRun() {
 	local RUN="${1}"
-	#sudo chroot $DEBROOT dhclient &>/dev/null
-	sudo cp /etc/resolv.conf $DEBROOT/etc/resolv.conf
+	#/usr/bin/sudo chroot $DEBROOT dhclient &>/dev/null
+	/usr/bin/sudo cp /etc/resolv.conf $DEBROOT/etc/resolv.conf
 
 	# Enable dead keys support
 	if [ "x$DEADKEYS" = "xy" ]; then
@@ -269,10 +269,10 @@ doRun() {
 
 	if ! [ -z "$RUN" ]; then
 		killall zenity &> /dev/null
-		sudo chroot $DEBROOT $RUN
+		/usr/bin/sudo chroot $DEBROOT $RUN
 	else
 		killall zenity &> /dev/null
-		sudo chroot $DEBROOT /usr/bin/lxterminal -e pdmenu
+		/usr/bin/sudo chroot $DEBROOT /usr/bin/lxterminal -e pdmenu
 	fi
 }
 
@@ -354,8 +354,8 @@ createLauncher() {
 	# Create a new entry if we don't already have one;
 	# Otherwise just go aheand and add the launcher to the AWN bar.
 	if ! [ -e "$MYAPP" ]; then
-		sudo touch "$MYAPP"
-		sudo chmod 666 "$MYAPP"
+		/usr/bin/sudo touch "$MYAPP"
+		/usr/bin/sudo chmod 666 "$MYAPP"
 		echo "[Desktop Entry]
 Encoding=UTF-8
 Name=$APPNAME
@@ -364,7 +364,7 @@ TryExec=/usr/sbin/debtop $APPDEST
 Exec=/usr/sbin/debtop $APPDEST
 Icon=/opt/DebTop/icons/${APPICON}
 Type=Application" > "$MYAPP"
-		sudo chmod 644 "$MYAPP"
+		/usr/bin/sudo chmod 644 "$MYAPP"
 	fi
 
 	echo "Adding $MYAPP to launcher list..."
