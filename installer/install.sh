@@ -10,6 +10,7 @@
 # License: GPLv3
 ###############################################################################
 test -x /usr/bin/sudo || exit 1
+export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin
 
 if ! [ -b /dev/block/loop50 ]; then
       /usr/bin/sudo mknod -m600 /dev/block/loop50 b 7 50
@@ -50,19 +51,22 @@ if ! [ -d /opt/DebTop/etc ]; then
 	/usr/bin/sudo chown adas.adas /opt/DebTop/etc
 fi
 
-echo ""
-echo "Do you want me to disable Tomoyo? If unsure just say yes."
-echo "[Y]/n"
-read DIS_TOMOYO
-if [ -z $DIS_TOMOYO ]; then DIS_TOMOYO="y"; fi
-DIS_TOMOYO=`echo $DIS_TOMOYO|cut -c1|tr [:upper:] [:lower:]` 
+# Temporarily moved to another branch until problems after
+# DebTop install are fixed.
 
-if [ "$DIS_TOMOYO" = "y" ]; then
-	echo "Disabling Tomoyo..."
-	/usr/bin/sudo mv /etc/tomoyo /etc/tomoyo.DebTop.orig
-	/usr/bin/sudo cp -r resources/tomoyo /etc
-	/usr/bin/sudo chown root.root -R /etc/tomoyo && echo "Tomoyo has been disabled. You'll need to turn your phone off and then on again after we're finished"
-fi
+#echo ""
+#echo "Do you want me to disable Tomoyo? If unsure just say yes."
+#echo "[Y]/n"
+#read DIS_TOMOYO
+#if [ -z $DIS_TOMOYO ]; then DIS_TOMOYO="y"; fi
+#DIS_TOMOYO=`echo $DIS_TOMOYO|cut -c1|tr [:upper:] [:lower:]` 
+#
+#if [ "$DIS_TOMOYO" = "y" ]; then
+#	echo "Disabling Tomoyo..."
+#	/usr/bin/sudo mv /etc/tomoyo /etc/tomoyo.DebTop.orig
+#	/usr/bin/sudo cp -r resources/tomoyo /etc
+#	/usr/bin/sudo chown root.root -R /etc/tomoyo && echo "Tomoyo has been disabled. You'll need to turn your phone off and then on again after we're finished"
+#fi
 
 ############################# Populate Settings ###############################
 > /opt/DebTop/etc/main.cf

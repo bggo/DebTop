@@ -134,9 +134,7 @@ fi
 
 /usr/bin/sudo umount /mnt
 
-LAUNCHERS=`gconftool -g /apps/avant-window-navigator/window_manager/launchers|cut -f2 -d[|cut -f1 -d]`
+LAUNCHERS=`/usr/bin/gconftool -g /apps/avant-window-navigator/window_manager/launchers|cut -f2 -d[|cut -f1 -d]`
 LAUNCHERS=`echo $LAUNCHERS,$EXTRA`
-gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string
-
-
+/usr/bin/gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string
 
