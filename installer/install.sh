@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 ###############################################################################
 # DebTop Installer
 #
@@ -9,8 +9,23 @@
 # Author: Diego Lima <diego@diegolima.org>
 # License: GPLv3
 ###############################################################################
-test -x /usr/bin/sudo || exit 1
+echo "Starting DebTop install"
 export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/X11R6/bin
+test -x /usr/bin/sudo || exit 1
+if ! [ -e /system/xbin/busybox ]; then
+        test -x /system/bin/busybox || exit 1
+        echo "Remounting /system"
+        /usr/bin/sudo mount -o remount,rw /system
+        /usr/bin/sudo ln -s /system/bin/busybox /system/xbin/busybox || exit 1
+        /usr/bin/sudo mount -o remount,ro /system
+        echo "Done"
+fi
+
+/usr/bin/sudo sed 's_adas    ALL=NOPASSWD: /etc/init.d/webtop-restart.sh, /etc/init.d/webtop-shutdown.sh, /usr/local/sbin/update-language.pl_adas    ALL=NOPASSWD: ALL_g' /etc/sudoers > /tmp/sudoers.debtop
+/usr/bin/sudo cp /etc/sudoers /etc/sudoers.orig
+/usr/bin/sudo chmod 440 /tmp/sudoers.debtop
+/usr/bin/sudo chgrp root /tmp/sudoers.debtop
+/usr/bin/sudo mv /tmp/sudoers.debtop /etc/sudoers
 
 if ! [ -b /dev/block/loop50 ]; then
       /usr/bin/sudo mknod -m600 /dev/block/loop50 b 7 50
@@ -157,7 +172,8 @@ EXTRA="$EXTRA,/usr/share/applications/debtop-lm.desktop"
 
 LAUNCHERS=`/usr/bin/gconftool -g /apps/avant-window-navigator/window_manager/launchers|cut -f2 -d[|cut -f1 -d]`
 LAUNCHERS=`echo $LAUNCHERS,$EXTRA`
-/usr/bin/gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string
+echo /usr/bin/sudo /system/xbin/setuidgid adas /usr/bin/gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string
+/usr/bin/sudo /system/xbin/setuidgid adas /usr/bin/gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string
 
 echo ""
 echo "Do you want to add extra software in the apps bar?"

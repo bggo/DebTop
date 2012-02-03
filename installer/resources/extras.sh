@@ -114,7 +114,7 @@ fi
 
 #--------------------------------- Synaptic -----------------------------------
 if [ -x /mnt/usr/sbin/synaptic ]; then
-	/usr/bin/sudo cp icon 
+	/usr/bin/sudo cp /mnt/usr/share/pixmaps/synaptic.png /opt/DebTop/icons/synaptic.png
 	/usr/bin/sudo touch /usr/share/applications/debtop-synaptic.desktop
 	/usr/bin/sudo chmod 666 /usr/share/applications/debtop-synaptic.desktop
 	echo "[Desktop Entry]
@@ -136,5 +136,5 @@ fi
 
 LAUNCHERS=`/usr/bin/gconftool -g /apps/avant-window-navigator/window_manager/launchers|cut -f2 -d[|cut -f1 -d]`
 LAUNCHERS=`echo $LAUNCHERS,$EXTRA`
-/usr/bin/gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string
+/usr/bin/sudo /system/xbin/setuidgid adas /usr/bin/gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string
 

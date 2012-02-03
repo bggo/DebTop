@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 ###############################################################################
 # Debtop
 #
@@ -113,10 +113,10 @@ createLoopDevice() {
 doMount() {
 	# Check if we're using an alternate partition on the SD card
 	if ! [ -z $SDPART ]; then
-		/usr/bin/sudo mount | grep $SDPART &>/dev/null
+		/usr/bin/sudo /system/bin/mount | grep $SDPART
 		if [ $? != 0 ]; then
 			echo "Mounting $SDPART on $MEDIA"
-			/usr/bin/sudo mount $SDPART $MEDIA || exit 1
+			/usr/bin/sudo /system/bin/mount $SDPART $MEDIA || exit 1
 		else
 			true
 		fi
@@ -127,7 +127,7 @@ doMount() {
 		exit 2
 	fi
 	
-	/usr/bin/sudo mount | grep $DEBROOT &>/dev/null
+	/usr/bin/sudo /system/bin/mount | grep $DEBROOT &>/dev/null
 	if [ $? != 0 ]; then
 		createLoopDevice
 
@@ -154,7 +154,7 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 		fi
 
 		echo "Mounting $DISK on $DEBROOT using ${LOOPDEVICE}${LOOPCNT}"
-		/usr/bin/sudo mount -o loop=${LOOPDEVICE}${LOOPCNT},noatime,data=journal $DISK $DEBROOT
+		/usr/bin/sudo /bin/mount -o loop=${LOOPDEVICE}${LOOPCNT},noatime,data=journal $DISK $DEBROOT
 		if [ $? != 0 ]; then
 			doUmount
 			XWARN "Could NOT mount $DISK. Please check that your SD card is working."
@@ -172,7 +172,7 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 			doMount
 		elif [[ ( $? != 0 ) && ( $REMOUNTING = 3 ) ]]; then
 			>> /tmp/debtop-debug
-			/usr/bin/sudo mount >> /tmp/debtop-debug
+			/usr/bin/sudo /system/bin/mount >> /tmp/debtop-debug
 			>> /tmp/debtop-debug
 			/usr/bin/sudo df >> /tmp/debtop-debug
 			>> /tmp/debtop-debug
@@ -192,7 +192,7 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 			doMount
 		elif [[ ( $? != 0 ) && ( $REMOUNTING = 3 ) ]]; then
 			>> /tmp/debtop-debug
-			/usr/bin/sudo mount >> /tmp/debtop-debug
+			/usr/bin/sudo /system/bin/mount >> /tmp/debtop-debug
 			>> /tmp/debtop-debug
 			/usr/bin/sudo df >> /tmp/debtop-debug
 			>> /tmp/debtop-debug
@@ -204,56 +204,56 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 	fi
 }
 doUmount() {
-	for i in `/usr/bin/sudo mount|grep $DEBROOT|awk '{print $3}'|tac`; do
+	for i in `/usr/bin/sudo /system/bin/mount|grep $DEBROOT|awk '{print $3}'|tac`; do
 		/usr/bin/sudo umount -l $i &> /dev/null
 	done
 }
 
 sysChroot() {
-	ACTION="/usr/bin/sudo mount -o bind"
+	ACTION="/usr/bin/sudo /system/bin/mount -o bind"
 
 	test -d $DEBROOT/proc || /usr/bin/sudo mkdir -p $DEBROOT/proc
-	/usr/bin/sudo mount | grep $DEBROOT/proc &>/dev/null|| \
+	/usr/bin/sudo /system/bin/mount | grep $DEBROOT/proc &>/dev/null|| \
 		/usr/bin/sudo $ACTION /proc $DEBROOT/proc &>/dev/null
 
 	test -d $DEBROOT/dev || /usr/bin/sudo mkdir -p $DEBROOT/dev
-	/usr/bin/sudo mount | grep $DEBROOT/dev &>/dev/null|| \
+	/usr/bin/sudo /system/bin/mount | grep $DEBROOT/dev &>/dev/null|| \
 		/usr/bin/sudo $ACTION /dev  $DEBROOT/dev &>/dev/null
 	
 	test -d $DEBROOT/dev/pts || /usr/bin/sudo mkdir -p $DEBROOT/dev/pts
-	/usr/bin/sudo mount | grep $DEBROOT/dev/pts &>/dev/null|| \
+	/usr/bin/sudo /system/bin/mount | grep $DEBROOT/dev/pts &>/dev/null|| \
 		/usr/bin/sudo $ACTION /dev/pts $DEBROOT/dev/pts &>/dev/null
 
 	test -d $DEBROOT/dev/shm || /usr/bin/sudo mkdir -p $DEBROOT/dev/shm
-	/usr/bin/sudo mount | grep $DEBROOT/dev/shm &>/dev/null|| \
+	/usr/bin/sudo /system/bin/mount | grep $DEBROOT/dev/shm &>/dev/null|| \
 		/usr/bin/sudo $ACTION /dev/shm $DEBROOT/dev/shm &>/dev/null
 
 	test -d $DEBROOT/sys || /usr/bin/sudo mkdir -p $DEBROOT/sys
-	/usr/bin/sudo mount | grep $DEBROOT/sys &>/dev/null|| \
+	/usr/bin/sudo /system/bin/mount | grep $DEBROOT/sys &>/dev/null|| \
 		/usr/bin/sudo $ACTION /sys  $DEBROOT/sys &>/dev/null
 
 	test -d $DEBROOT/tmp || /usr/bin/sudo mkdir -p $DEBROOT/tmp
-	/usr/bin/sudo mount | grep $DEBROOT/tmp &>/dev/null|| \
+	/usr/bin/sudo /system/bin/mount | grep $DEBROOT/tmp &>/dev/null|| \
 		/usr/bin/sudo $ACTION /tmp  $DEBROOT/tmp &>/dev/null
 
 	test -d $DEBROOT/var/tmp || /usr/bin/sudo mkdir -p $DEBROOT/var/tmp
-	/usr/bin/sudo mount | grep $DEBROOT/var/tmp &>/dev/null|| \
+	/usr/bin/sudo /system/bin/mount | grep $DEBROOT/var/tmp &>/dev/null|| \
 		/usr/bin/sudo $ACTION /var/tmp $DEBROOT/var/tmp &>/dev/null
 
 	test -d $DEBROOT/var/run/dbus || /usr/bin/sudo mkdir -p $DEBROOT/var/run/dbus
-	/usr/bin/sudo mount | grep $DEBROOT/var/run/dbus &>/dev/null|| \
+	/usr/bin/sudo /system/bin/mount | grep $DEBROOT/var/run/dbus &>/dev/null|| \
 		/usr/bin/sudo $ACTION /var/run/dbus $DEBROOT/var/run/dbus &>/dev/null
 
 	test -d $DEBROOT/media/sdcard || /usr/bin/sudo mkdir -p $DEBROOT/media/sdcard
-	/usr/bin/sudo mount | grep $DEBROOT/media/sdcard &>/dev/null|| \
+	/usr/bin/sudo /system/bin/mount | grep $DEBROOT/media/sdcard &>/dev/null|| \
 		/usr/bin/sudo $ACTION /sdcard $DEBROOT/media/sdcard &>/dev/null
 
 	test -d $DEBROOT/media/sdcard-ext || /usr/bin/sudo mkdir -p $DEBROOT/media/sdcard-ext
-	/usr/bin/sudo mount | grep $DEBROOT/media/sdcard-ext &>/dev/null|| \
+	/usr/bin/sudo /system/bin/mount | grep $DEBROOT/media/sdcard-ext &>/dev/null|| \
 		/usr/bin/sudo $ACTION /sdcard-ext $DEBROOT/media/sdcard-ext &>/dev/null
 
 	test -d $DEBROOT/home/adas || /usr/bin/sudo mkdir -p $DEBROOT/home/adas
-	/usr/bin/sudo mount | grep $DEBROOT/home/adas &>/dev/null|| \
+	/usr/bin/sudo /system/bin/mount | grep $DEBROOT/home/adas &>/dev/null|| \
 		/usr/bin/sudo $ACTION /home/adas $DEBROOT/home/adas
 }
 
@@ -383,12 +383,12 @@ if [ "$PROGRAM" == "stop" ]; then
 	doUmount
 elif [ "$PROGRAM" == "launcher-manager" ]; then
 	doMount
-	sysChroot mount
+	sysChroot /system/bin/mount
 	startLauncherManager
 else
 	echo "Starting DebTop"
 	XINFONOWAIT "Launching DebTop. This may take a while..."
 	doMount
-	sysChroot mount
+	sysChroot /system/bin/mount
 	doRun "$PROGRAM"
 fi
