@@ -161,46 +161,58 @@ We can try to fix them and mount anyway, or you can check the wiki and try to ma
 			exit 3
 		fi
 
-		# Make sure the mounted disk is valid or try to remount
-		test -f $DEBROOT/bin/sh
-		if [[ ( $? != 0 ) && ( $REMOUNTING < 3 ) ]]; then
-			# Try to remount. For some reason mount reports the disk is mounted while it isn't
-			# on the first time DebTop is started.
-			echo "Image did not contain a valid shell. Trying to remount - $REMOUNTING."
-			REMOUNTING=$(($REMOUNTING+1))
-			doUmount
-			doMount
-		elif [[ ( $? != 0 ) && ( $REMOUNTING = 3 ) ]]; then
-			>> /tmp/debtop-debug
-			/usr/bin/sudo /system/bin/mount >> /tmp/debtop-debug
-			>> /tmp/debtop-debug
-			/usr/bin/sudo df >> /tmp/debtop-debug
-			>> /tmp/debtop-debug
-			ls $DEBROOT >> /tmp/debtop-debug
-			doUmount
-			XWARN "Your image does not contain a valid shell!"
-			exit 5
-		fi
 
-	else
-		# Make sure the mounted disk is valid or try to remount
-		test -f $DEBROOT/bin/sh
-		if [[ ( $? != 0 ) && ( $REMOUNTING < 3 ) ]]; then
-			echo "Image did not contain a valid shell. Trying to remount - $REMOUNTING."
-			REMOUNTING=$(($REMOUNTING+1))
-			doUmount
-			doMount
-		elif [[ ( $? != 0 ) && ( $REMOUNTING = 3 ) ]]; then
-			>> /tmp/debtop-debug
-			/usr/bin/sudo /system/bin/mount >> /tmp/debtop-debug
-			>> /tmp/debtop-debug
-			/usr/bin/sudo df >> /tmp/debtop-debug
-			>> /tmp/debtop-debug
-			ls $DEBROOT >> /tmp/debtop-debug
-			doUmount
-			XWARN "Your image does not contain a valid shell!"
-			exit 5
-		fi
+	
+#		# TODO: Clean up this block. Remouting shouldn't be necessary as long as
+#		# we use /system/bin/mount instead of /bin/mount to check if a disk is
+#		# currently mounted
+#		#
+#		# Make sure the mounted disk is valid or try to remount
+#		test -f $DEBROOT/bin/sh
+#		if [[ ( $? != 0 ) && ( $REMOUNTING < 3 ) ]]; then
+#			# Try to remount. For some reason mount reports the disk is mounted while it isn't
+#			# on the first time DebTop is started.
+#			echo "Image did not contain a valid shell. Trying to remount - $REMOUNTING."
+#			REMOUNTING=$(($REMOUNTING+1))
+#			doUmount
+#			doMount
+#		elif [[ ( $? != 0 ) && ( $REMOUNTING = 3 ) ]]; then
+#			>> /tmp/debtop-debug
+#			/usr/bin/sudo /system/bin/mount >> /tmp/debtop-debug
+#			>> /tmp/debtop-debug
+#			/usr/bin/sudo df >> /tmp/debtop-debug
+#			>> /tmp/debtop-debug
+#			ls $DEBROOT >> /tmp/debtop-debug
+#			doUmount
+#			XWARN "Your image does not contain a valid shell!"
+#			exit 5
+#		fi
+#
+#	else
+#		# Make sure the mounted disk is valid or try to remount
+#		test -f $DEBROOT/bin/sh
+#		if [[ ( $? != 0 ) && ( $REMOUNTING < 3 ) ]]; then
+#			echo "Image did not contain a valid shell. Trying to remount - $REMOUNTING."
+#			REMOUNTING=$(($REMOUNTING+1))
+#			doUmount
+#			doMount
+#		elif [[ ( $? != 0 ) && ( $REMOUNTING = 3 ) ]]; then
+#			>> /tmp/debtop-debug
+#			/usr/bin/sudo /system/bin/mount >> /tmp/debtop-debug
+#			>> /tmp/debtop-debug
+#			/usr/bin/sudo df >> /tmp/debtop-debug
+#			>> /tmp/debtop-debug
+#			ls $DEBROOT >> /tmp/debtop-debug
+#			doUmount
+#			XWARN "Your image does not contain a valid shell!"
+#			exit 5
+#		fi
+	fi
+
+	test -f $DEBROOT/bin/sh 
+	if [ $? != 0 ]; then 
+		XWARN "Your image does not contain a valid shell!" 
+		exit 1
 	fi
 }
 doUmount() {
