@@ -119,7 +119,7 @@ if [ -x /mnt/usr/sbin/synaptic ]; then
 	/usr/bin/sudo chmod 666 /usr/share/applications/debtop-synaptic.desktop
 	echo "[Desktop Entry]
 Encoding=UTF-8
-Name=Screenshot
+Name=Synaptic
 GenericName=Synaptic
 Comment=Install, remove and manage software for you DebTop
 TryExec=/usr/sbin/debtop synaptic

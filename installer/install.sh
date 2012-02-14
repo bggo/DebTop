@@ -184,3 +184,5 @@ if [ -z $PLUS ]; then PLUS="y"; fi
 if [ $PLUS = "y" ]; then
 	. resources/extras.sh
 fi
+
+echo "Install complete! Please reboot your phone in order to apply the changes."
