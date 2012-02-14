@@ -15,9 +15,9 @@ test -x /usr/bin/sudo || exit 1
 if ! [ -e /system/xbin/busybox ]; then
         test -x /system/bin/busybox || exit 1
         echo "Remounting /system"
-        /usr/bin/sudo mount -o remount,rw /system
+        /usr/bin/sudo /system/bin/mount -o remount,rw /system
         /usr/bin/sudo ln -s /system/bin/busybox /system/xbin/busybox || exit 1
-        /usr/bin/sudo mount -o remount,ro /system
+        /usr/bin/sudo /system/bin/mount -o remount,ro /system
         echo "Done"
 fi
 
