@@ -132,7 +132,7 @@ Type=Application" > /usr/share/applications/debtop-synaptic.desktop
 fi
 
 
-/usr/bin/sudo umount /mnt
+/usr/bin/sudo umount /mnt &>/dev/null
 
 LAUNCHERS=`/usr/bin/gconftool -g /apps/avant-window-navigator/window_manager/launchers|cut -f2 -d[|cut -f1 -d]`
 LAUNCHERS=`echo $LAUNCHERS,$EXTRA`

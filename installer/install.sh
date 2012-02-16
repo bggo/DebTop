@@ -172,7 +172,6 @@ EXTRA="$EXTRA,/usr/share/applications/debtop-lm.desktop"
 
 LAUNCHERS=`/usr/bin/gconftool -g /apps/avant-window-navigator/window_manager/launchers|cut -f2 -d[|cut -f1 -d]`
 LAUNCHERS=`echo $LAUNCHERS,$EXTRA`
-echo /usr/bin/sudo /system/xbin/setuidgid adas /usr/bin/gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string
 /usr/bin/sudo /system/xbin/setuidgid adas /usr/bin/gconftool -s /apps/avant-window-navigator/window_manager/launchers "[$LAUNCHERS]" --type list --list-type string
 
 echo ""
